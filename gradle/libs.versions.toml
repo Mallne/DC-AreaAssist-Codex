@@ -1,28 +1,30 @@
+
 [versions]
-exposed-version = "0.58.0"
+exposed-version = "0.61.0"
 h2-version = "2.3.232"
-koin-version = "4.0.1"
+koin-version = "3.5.6"
 kotlin-version = "2.1.10"
-ktor-version = "3.0.3"
-logback-version = "1.5.16"
-postgres-version = "42.7.5"
+ktor-version = "3.1.3"
+logback-version = "1.4.14"
 
 [libraries]
-ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor-version" }
-ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor-version" }
-ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor-version" }
-ktor-server-rate-limiting = { module = "io.ktor:ktor-server-rate-limit", version.ref = "ktor-version" }
-ktor-server-compression = { module = "io.ktor:ktor-server-compression", version.ref = "ktor-version" }
-ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor-version" }
-ktor-server-forwarded-header = { module = "io.ktor:ktor-server-forwarded-header", version.ref = "ktor-version" }
-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-version" }
-ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
-postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres-version" }
-h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
-exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
-exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
 koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin-version" }
 koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin-version" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor-version" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-version" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
+h2 = { module = "com.h2database:h2", version.ref = "h2-version" }
+ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor-version" }
+ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response", version.ref = "ktor-version" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor-version" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }
+ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor-version" }
+ktor-server-forwarded-header = { module = "io.ktor:ktor-server-forwarded-header", version.ref = "ktor-version" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor-version" }
+ktor-server-caching-headers = { module = "io.ktor:ktor-server-caching-headers", version.ref = "ktor-version" }
+ktor-server-compression = { module = "io.ktor:ktor-server-compression", version.ref = "ktor-version" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor-version" }

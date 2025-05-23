@@ -1,1 +1,1 @@
-rootProject.name = "areaassist"
+rootProject.name = "synapse"

@@ -1,4 +1,4 @@
-package cloud.mallne.dicentra
+package cloud.mallne.dicentra.areaassist
 
 import io.ktor.client.request.*
 import io.ktor.http.*
