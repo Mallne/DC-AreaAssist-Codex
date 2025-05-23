@@ -1,5 +1,6 @@
-package cloud.mallne.dicentra.areaassist
+package cloud.mallne.dicentra.areaassist.synapse
 
+import cloud.mallne.dicentra.areaassist.synapse.config.*
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
@@ -8,7 +9,6 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     configureFrameworks()
-    configureSerialization()
     configureDatabases()
     configureSecurity()
     configureHTTP()

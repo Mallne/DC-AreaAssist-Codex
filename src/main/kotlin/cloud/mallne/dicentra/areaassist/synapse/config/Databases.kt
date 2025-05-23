@@ -1,5 +1,7 @@
-package cloud.mallne.dicentra.areaassist
+package cloud.mallne.dicentra.areaassist.synapse.config
 
+import cloud.mallne.dicentra.areaassist.synapse.ExposedUser
+import cloud.mallne.dicentra.areaassist.synapse.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

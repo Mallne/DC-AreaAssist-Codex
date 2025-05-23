@@ -1,6 +1,17 @@
 ktor:
   application:
     modules:
-      - cloud.mallne.dicentra.areaassist.ApplicationKt.module
+      - cloud.mallne.dicentra.areaassist.synapse.ApplicationKt.module
   deployment:
     port: 8080
+
+security:
+  enabled: "$SECURITY_ENABLED:false"
+  issuer: "$SECURITY_ISSUER:"
+  scopes: "${SECURITY_SCOPES:"
+  client_id: "$SECURITY_CLIENTID:"
+  client_secret: "$SECURITY_CLIENTSECRET:"
+  role_scope: "$SECURITY_ROLESCOPE:"
+  roles:
+    user: "$SECURITY_ROLES_USER:"
+    superadmin: "$SECURITY_ROLES_SUPERADMIN:"

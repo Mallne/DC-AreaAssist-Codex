@@ -1,4 +1,4 @@
-package cloud.mallne.dicentra.areaassist
+package cloud.mallne.dicentra.areaassist.synapse.config
 
 import io.ktor.http.*
 import io.ktor.http.content.*

@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
@@ -28,8 +27,11 @@ dependencies {
     implementation(libs.ktor.server.request.validation)
     implementation(libs.ktor.server.auto.head.response)
     implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
     implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.apache)
+    implementation(libs.ktor.client.auth)
     implementation(libs.ktor.server.forwarded.header)
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.caching.headers)
