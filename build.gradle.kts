@@ -1,7 +1,8 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kjvm)
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.ktor)
-    alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 group = "cloud.mallne.dicentra.areaassist"
@@ -9,10 +10,6 @@ version = "0.0.1"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {
@@ -41,4 +38,21 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+
+    //aviator
+    if (findProject(":aviator:clients:ktor") != null) {
+        implementation(project(":aviator:clients:ktor"))
+    } else {
+        implementation(libs.dc.aviator.clients.ktor)
+    }
+    if (findProject(":aviator:plugin:translation-keys") != null) {
+        implementation(project(":aviator:plugin:translation-keys"))
+    } else {
+        implementation(libs.dc.aviator.plugins.translationkeys)
+    }
+    if (findProject(":aviator:plugin:interception") != null) {
+        implementation(project(":aviator:plugin:interception"))
+    } else {
+        implementation(libs.dc.aviator.plugins.interception)
+    }
 }
