@@ -1,4 +1,4 @@
-package cloud.mallne.dicentra.areaassist
+package cloud.mallne.dicentra.areaassist.synapse
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable

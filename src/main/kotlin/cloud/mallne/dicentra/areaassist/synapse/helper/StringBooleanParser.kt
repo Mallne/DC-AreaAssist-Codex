@@ -1,4 +1,4 @@
-package cloud.mallne.dicentra.areaassist.helper
+package cloud.mallne.dicentra.areaassist.synapse.helper
 
 fun String.toBooleanish(): Boolean? {
     val upper = this.uppercase()

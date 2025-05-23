@@ -1,5 +1,6 @@
-package cloud.mallne.dicentra.areaassist
+package cloud.mallne.dicentra.areaassist.synapse.config
 
+import cloud.mallne.dicentra.areaassist.synapse.HelloService
 import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
