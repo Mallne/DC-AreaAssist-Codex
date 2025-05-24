@@ -54,7 +54,7 @@ fun Application.configureSecurity() {
                             header(HttpHeaders.Authorization, "Basic ${settings.encodedCredentials()}")
                         }.body<IntrospectionResponse>()
                         this@configureSecurity.log.info("User ${response.name} requested a Resource")
-                        response
+                        response.toUser(config = settings)
                     } catch (e: Exception) {
                         null
                     }
