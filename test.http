@@ -1,6 +1,6 @@
 ### GET request to example server
 GET {{server}}
-Authorization: Bearer {{$auth.token("keycloak")}}
+#Authorization: Bearer {{$auth.token("keycloak")}}
 
 ### GET all Baked in Services
 GET {{server}}/baked

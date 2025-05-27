@@ -29,8 +29,10 @@ class DatabaseService(config: Configuration) {
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
     init {
-        val scm = Schema(config.data.schema)
-        SchemaUtils.createSchema(scm)
-        SchemaUtils.setSchema(scm)
+        transaction {
+            val scm = Schema(config.data.schema)
+            SchemaUtils.createSchema(scm)
+            SchemaUtils.setSchema(scm)
+        }
     }
 }
