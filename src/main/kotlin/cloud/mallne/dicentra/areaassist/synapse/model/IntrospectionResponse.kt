@@ -33,9 +33,13 @@ data class IntrospectionResponse(
     @SerialName("client_id")
     val clientId: String,
 ) {
-    fun toUser(config: OAuthConfig): User {
-        val acl = User.AccessLevels(config.roles.user in groups, config.roles.superAdmin in groups)
+    fun toUser(config: OAuthConfig, scopes: List<String>): User {
+        val acl = User.AccessLevels(
+            config.roles.user in groups,
+            config.roles.admin in groups,
+            config.roles.superAdmin in groups
+        )
         val locked = config.enabled && !active && !emailVerified
-        return User(name, email, preferredUsername, locked, acl)
+        return User(name, email, preferredUsername, locked, acl, scopes)
     }
 }

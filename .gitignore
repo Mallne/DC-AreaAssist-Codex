@@ -39,3 +39,4 @@ out/
 
 .env
 http-client.private.env.json
+/local.properties

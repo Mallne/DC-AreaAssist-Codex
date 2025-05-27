@@ -1,43 +1,38 @@
 package cloud.mallne.dicentra.areaassist.synapse.config
 
-import cloud.mallne.dicentra.areaassist.synapse.helper.toBooleanish
+import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
 import cloud.mallne.dicentra.areaassist.synapse.model.IntrospectionResponse
 import cloud.mallne.dicentra.areaassist.synapse.model.OAuthConfig
+import cloud.mallne.dicentra.areaassist.synapse.service.ScopeService
 import cloud.mallne.dicentra.areaassist.synapse.statics.Client
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.config.*
 import kotlinx.coroutines.runBlocking
+import org.koin.ktor.ext.inject
+import org.slf4j.LoggerFactory
 
 fun Application.configureSecurity() {
 
     // Get security settings and default to enabled if missing
     // See https://ktor.io/docs/server-jwt.html#configure-verifier
-    val settings = OAuthConfig(
-        enabled = environment.config.tryGetString("security.enabled")?.toBooleanish() ?: false,
-        issuer = environment.config.tryGetString("security.issuer") ?: "",
-        scopes = environment.config.tryGetString("security.scopes") ?: "",
-        clientId = environment.config.tryGetString("security.client_id") ?: "",
-        clientSecret = environment.config.tryGetString("security.client_secret") ?: "",
-        roles = OAuthConfig.Roles(
-            user = environment.config.tryGetString("security.roles.user") ?: "",
-            superAdmin = environment.config.tryGetString("security.roles.superadmin") ?: "",
-        )
-    )
+    val config by inject<Configuration>()
+    val settings = OAuthConfig(config)
     runBlocking {
         settings.configure()
     }
+    val scopeService by inject<ScopeService>()
 
 
     authentication {
         bearer {
             if (settings.enabled) {
-                authenticate {
-                    val token = it.token
-                    this@configureSecurity.log.debug(
+                val log = LoggerFactory.getLogger("Security")
+                authenticate { jwt ->
+                    val token = jwt.token
+                    log.debug(
                         "Attempting introspection for token (first 10 chars): ${token.take(10)}..."
                     )
                     try {
@@ -53,10 +48,13 @@ fun Application.configureSecurity() {
                             )
                             header(HttpHeaders.Authorization, "Basic ${settings.encodedCredentials()}")
                         }.body<IntrospectionResponse>()
-                        this@configureSecurity.log.info("User ${response.name} requested a Resource")
-                        response.toUser(config = settings)
+                        log.info("User ${response.name} requested a Resource")
+                        response.toUser(
+                            config = settings,
+                            scopes = scopeService.readForAttachment(ScopeService.user(response.preferredUsername))
+                                .map { it.name })
                     } catch (e: Exception) {
-                        null
+                        log.error(e.message, e)
                     }
                 }
             }

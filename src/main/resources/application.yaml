@@ -5,6 +5,17 @@ ktor:
   deployment:
     port: 8080
 
+server:
+  cors:
+    all: "$CORS_ALL:false"
+    hosts: "$CORS_HOSTS:"
+
+data:
+  url: "$DATA_URL"
+  user: "$DATA_USER"
+  password: "$DATA_PASSWORD"
+  schema: "$DATA_SCHEMA:areaassist_synapse"
+
 security:
   enabled: "$SECURITY_ENABLED:false"
   issuer: "$SECURITY_ISSUER:"
@@ -14,4 +25,5 @@ security:
   role_scope: "$SECURITY_ROLESCOPE:"
   roles:
     user: "$SECURITY_ROLES_USER:"
+    admin: "$SECURITY_ROLES_ADMIN:"
     superadmin: "$SECURITY_ROLES_SUPERADMIN:"

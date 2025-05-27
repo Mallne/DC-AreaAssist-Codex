@@ -15,6 +15,19 @@ data class OAuthConfig(
     val clientSecret: String,
     val roles: Roles
 ) {
+    constructor(configuration: Configuration) : this(
+        enabled = configuration.security.enabled,
+        issuer = configuration.security.issuer,
+        scopes = configuration.security.scopes,
+        clientId = configuration.security.clientId,
+        clientSecret = configuration.security.clientSecret,
+        roles = Roles(
+            user = configuration.security.roles.user,
+            admin = configuration.security.roles.admin,
+            superAdmin = configuration.security.roles.superAdmin
+        )
+    )
+
     lateinit var oidcConfig: OIDCConfig
 
     @OptIn(ExperimentalEncodingApi::class)
@@ -32,6 +45,7 @@ data class OAuthConfig(
 
     data class Roles(
         val user: String,
+        val admin: String,
         val superAdmin: String,
     )
 

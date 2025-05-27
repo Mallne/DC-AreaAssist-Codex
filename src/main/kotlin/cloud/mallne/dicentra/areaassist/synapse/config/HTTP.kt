@@ -1,17 +1,22 @@
 package cloud.mallne.dicentra.areaassist.synapse.config
 
+import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
 import cloud.mallne.dicentra.areaassist.synapse.statics.Serialization
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.autohead.*
 import io.ktor.server.plugins.cachingheaders.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.plugins.requestvalidation.*
+import org.koin.ktor.ext.inject
 
 fun Application.configureHTTP() {
+    val config by inject<Configuration>()
     install(ForwardedHeaders) // WARNING: for security, do not include this if not behind a reverse proxy
     install(XForwardedHeaders) // WARNING: for security, do not include this if not behind a reverse proxy
     install(CORS) {
@@ -20,8 +25,14 @@ fun Application.configureHTTP() {
         allowMethod(HttpMethod.Delete)
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
-        allowHeader("MyCustomHeader")
-        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+        if (config.server.cors.all) {
+            anyHost()
+        }
+        if (config.server.cors.hosts.isNotEmpty()) {
+            for (string in config.server.cors.hosts) {
+                allowHost(string)
+            }
+        }
     }
     install(CachingHeaders) {
         options { call, outgoingContent ->
@@ -35,4 +46,7 @@ fun Application.configureHTTP() {
     install(ContentNegotiation) {
         json(Serialization())
     }
+    install(RequestValidation) {
+    }
+    install(AutoHeadResponse)
 }
