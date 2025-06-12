@@ -12,6 +12,7 @@ import org.koin.core.annotation.Single
 
 @Single
 class DatabaseService(config: Configuration) {
+    private val scm = Schema(config.data.schema)
     val database = Database.Companion.connect(
         url = "jdbc:${config.data.url}",
         user = config.data.user,
@@ -20,17 +21,22 @@ class DatabaseService(config: Configuration) {
     )
 
     fun <T> transaction(block: Transaction.() -> T): T {
-        return transaction(database, block)
+        return transaction(database) {
+            SchemaUtils.setSchema(scm)
+            block()
+        }
     }
 
     suspend operator fun <T> invoke(block: Transaction.() -> T): T = dbQuery(block)
 
     suspend fun <T> dbQuery(block: suspend Transaction.() -> T): T =
-        newSuspendedTransaction(Dispatchers.IO) { block() }
+        newSuspendedTransaction(Dispatchers.IO) {
+            SchemaUtils.setSchema(scm)
+            block()
+        }
 
     init {
         transaction {
-            val scm = Schema(config.data.schema)
             SchemaUtils.createSchema(scm)
             SchemaUtils.setSchema(scm)
         }
