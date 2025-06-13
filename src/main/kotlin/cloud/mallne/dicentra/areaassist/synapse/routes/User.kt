@@ -8,6 +8,15 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
+/**
+ * Registers the `/user` route under the Ktor application's routing.
+ * The route is authenticated and allows a user to retrieve their own profile data.
+ *
+ * The user must be authenticated to access this endpoint. If the authentication is absent or invalid,
+ * the route responds with an HTTP 401 Unauthorized status along with an appropriate error message.
+ *
+ * If authentication succeeds, the route responds with the authenticated user's data.
+ */
 fun Application.user() {
     routing {
         authenticate {

@@ -8,6 +8,16 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 import org.koin.core.annotation.Single
 
+/**
+ * Service class that provides CRUD operations for managing scope-related data.
+ *
+ * This service interacts with a PostgreSQL database using the Exposed library
+ * and performs operations within transactional contexts provided by `DatabaseService`.
+ *
+ * @constructor Initializes the `ScopeService` and creates the `Scopes` table if it does not already exist.
+ *
+ * @property databaseService The `DatabaseService` instance used to execute database transactions.
+ */
 @Single
 class ScopeService(private val databaseService: DatabaseService) {
     object Scopes : IntIdTable() {
@@ -22,6 +32,14 @@ class ScopeService(private val databaseService: DatabaseService) {
         }
     }
 
+    /**
+     * Creates a new scope record in the database and returns its generated ID.
+     *
+     * @param scopeDTO the data transfer object containing the scope information
+     *                 to be saved in the database. It includes the scope's name
+     *                 and associated attachments.
+     * @return the ID of the newly created scope record.
+     */
     suspend fun create(scopeDTO: ScopeDTO): Int = databaseService {
         Scopes.insert {
             it[name] = scopeDTO.name
@@ -29,6 +47,12 @@ class ScopeService(private val databaseService: DatabaseService) {
         }[Scopes.id].value
     }
 
+    /**
+     * Retrieves a `ScopeDTO` object corresponding to the specified ID from the database.
+     *
+     * @param id the unique identifier of the scope to be retrieved.
+     * @return the `ScopeDTO` object if found, or `null` if no scope exists with the given ID.
+     */
     suspend fun read(id: Int): ScopeDTO? {
         return databaseService {
             Scopes.selectAll()
@@ -38,6 +62,13 @@ class ScopeService(private val databaseService: DatabaseService) {
         }
     }
 
+    /**
+     * Retrieves a list of `ScopeDTO` objects from the database that have an attachment
+     * matching the provided parameter.
+     *
+     * @param attachment the attachment identifier used to filter the scopes in the database.
+     * @return a list of `ScopeDTO` objects with the specified attachment.
+     */
     suspend fun readForAttachment(attachment: String): List<ScopeDTO> {
         return databaseService {
             Scopes.selectAll()
@@ -46,6 +77,12 @@ class ScopeService(private val databaseService: DatabaseService) {
         }
     }
 
+    /**
+     * Retrieves a list of `ScopeDTO` objects from the database where the scope name matches the given parameter.
+     *
+     * @param name the name of the scope to filter for in the database.
+     * @return a list of `ScopeDTO` objects that have the specified name.
+     */
     suspend fun readForName(name: String): List<ScopeDTO> {
         return databaseService {
             Scopes.selectAll()
@@ -54,6 +91,12 @@ class ScopeService(private val databaseService: DatabaseService) {
         }
     }
 
+    /**
+     * Updates an existing scope record in the database using the provided data transfer object.
+     *
+     * @param scopeDTO the data transfer object containing the updated scope information.
+     *                 This includes the scope's unique identifier, name, and associated attachments.
+     */
     suspend fun update(scopeDTO: ScopeDTO) {
         databaseService {
             Scopes.update({ Scopes.id eq scopeDTO.id }) {
@@ -63,12 +106,22 @@ class ScopeService(private val databaseService: DatabaseService) {
         }
     }
 
+    /**
+     * Deletes a scope record from the database based on the provided ID.
+     *
+     * @param id the unique identifier of the scope to be deleted.
+     */
     suspend fun delete(id: Int) {
         databaseService {
             Scopes.deleteWhere { Scopes.id.eq(id) }
         }
     }
 
+    /**
+     * Deletes a scope record from the database where the scope name matches the specified parameter.
+     *
+     * @param name the name of the scope to be deleted.
+     */
     suspend fun deleteByName(name: String) {
         databaseService {
             Scopes.deleteWhere { Scopes.name.eq(name) }

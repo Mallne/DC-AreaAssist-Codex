@@ -12,6 +12,25 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
+/**
+ * Configures routing for scope-related operations and handles requests for creating, reading, and deleting scopes.
+ *
+ * This method provides routes for managing scopes with the following endpoints:
+ *
+ * - **GET /scope/{scope}**: Reads a list of attachments for the specified scope name,
+ *   ensuring the authenticated user has sufficient permissions.
+ * - **DELETE /scope/{scope}**: Deletes the specified scope name if the authenticated user has admin privileges.
+ * - **POST /scope**: Creates a new scope based on the payload, provided it does not already exist
+ *   and the authenticated user meets the required permissions.
+ *
+ * Authorization is enforced for all operations, and users must authenticate before using the endpoints.
+ *
+ * Request validations are performed to ensure:
+ * - Required parameters are present.
+ * - The authenticated user has adequate privileges based on the operation and scope.
+ *
+ * Any validation failures will result in appropriate HTTP error responses.
+ */
 fun Application.scope() {
     val scopeService by inject<ScopeService>()
     routing {
