@@ -1,7 +1,7 @@
 [versions]
 android-minSdk = "28"
 android-compileSdk = "35"
-agp = "8.11.1"
+agp = "8.10.0"
 exposed-version = "0.61.0"
 koin = "4.1.0"
 koin-annotations = "2.1.0"
@@ -13,7 +13,8 @@ serialization = "1.9.0"
 dc-polyfill = "1.0.0-SNAPSHOT"
 dc-aviator = "1.0.0-SNAPSHOT"
 postgres = "42.7.7"
-kotlinx-datetime = "0.7.1-0.6.x-compat"
+kotlinx-datetime = "0.7.1"
+mcp = "0.5.0"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
@@ -47,6 +48,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+mcp = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 dc-polyfill = { module = "cloud.mallne.dicentra:polyfill", version.ref = "dc-polyfill" }
 dc-aviator-core = { module = "cloud.mallne.dicentra.aviator:core", version.ref = "dc-aviator" }

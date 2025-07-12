@@ -1,8 +1,6 @@
 package cloud.mallne.dicentra.areaassist.synapse.routes
 
-import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryRequest
-import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryResponse
-import cloud.mallne.dicentra.areaassist.synapse.model.User
+import cloud.mallne.dicentra.areaassist.synapse.model.*
 import cloud.mallne.dicentra.areaassist.synapse.service.APIDBService
 import cloud.mallne.dicentra.areaassist.synapse.statics.APIService
 import cloud.mallne.dicentra.areaassist.synapse.statics.verify
@@ -48,6 +46,7 @@ import org.koin.ktor.ext.inject
  * verification checks.
  */
 fun Application.discovery() {
+    val config by inject<Configuration>()
     val apiService by inject<APIDBService>()
     routing {
         authenticate(optional = true) {
@@ -60,7 +59,8 @@ fun Application.discovery() {
                 }
                 val response = DiscoveryResponse(
                     user,
-                    services.map { it.serviceDefinition }
+                    services.map { it.serviceDefinition },
+                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                 )
                 call.respond(response)
             }
@@ -74,7 +74,8 @@ fun Application.discovery() {
                 }
                 val discoveryResponse = DiscoveryResponse(
                     user,
-                    APIService.apis
+                    APIService.apis,
+                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                 )
                 call.respond(discoveryResponse)
             }
@@ -91,7 +92,8 @@ fun Application.discovery() {
                 }
                 val discoveryResponse = DiscoveryResponse(
                     user,
-                    listOf(inDB.serviceDefinition)
+                    listOf(inDB.serviceDefinition),
+                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                 )
                 call.respond(discoveryResponse)
             }
@@ -104,7 +106,8 @@ fun Application.discovery() {
                 val inDB = apiService.readForScope(scope)
                 val discoveryResponse = DiscoveryResponse(
                     user,
-                    inDB.map { it.serviceDefinition }
+                    inDB.map { it.serviceDefinition },
+                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                 )
                 call.respond(discoveryResponse)
             }

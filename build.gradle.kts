@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.ktor.server.caching.headers)
     implementation(libs.ktor.server.compression)
     implementation(libs.ktor.server.netty)
+    implementation(libs.mcp)
     implementation(libs.logback.classic)
     implementation(libs.kotlinx.datetime)
     implementation(libs.ktor.server.config.yaml)

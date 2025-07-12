@@ -66,7 +66,7 @@ fun Application.scope() {
                 val body = call.receive<ScopeRequest>()
                 verify(user.access.superAdmin || user.scopes.contains(body.name) || body.attachments.contains(user.userScope)) { HttpStatusCode.Forbidden to "You must be a member of the Scope you are trying to create!" }
                 val already = scopeService.readForName(body.name)
-                verify(already.isEmpty()) { HttpStatusCode.Conflict to "The Scope '${body.name}' already exists!" }
+                verify(already.isNotEmpty()) { HttpStatusCode.Conflict to "The Scope '${body.name}' already exists!" }
                 val scopes = body.toDTO()
                 for (scope in scopes) {
                     scopeService.create(scope)
