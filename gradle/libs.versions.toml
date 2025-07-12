@@ -1,19 +1,19 @@
 [versions]
 android-minSdk = "28"
 android-compileSdk = "35"
-agp = "8.10.0"
+agp = "8.11.1"
 exposed-version = "0.61.0"
 koin = "4.1.0"
 koin-annotations = "2.1.0"
 ksp = "2.2.0-2.0.2"
 kotlin = "2.2.0"
-ktor = "3.2.0"
+ktor = "3.2.1"
 logback-version = "1.5.18"
 serialization = "1.9.0"
 dc-polyfill = "1.0.0-SNAPSHOT"
 dc-aviator = "1.0.0-SNAPSHOT"
 postgres = "42.7.7"
-kotlinx-datetime = "0.7.0-0.6.x-compat"
+kotlinx-datetime = "0.7.1-0.6.x-compat"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
