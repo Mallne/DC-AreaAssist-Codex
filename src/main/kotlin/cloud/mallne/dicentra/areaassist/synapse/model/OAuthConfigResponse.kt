@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @ResponseObject
+@Deprecated("Make this also a ServiceDefinition")
 data class OAuthConfigResponse(
     val issuer: String,
     val scopes: String,

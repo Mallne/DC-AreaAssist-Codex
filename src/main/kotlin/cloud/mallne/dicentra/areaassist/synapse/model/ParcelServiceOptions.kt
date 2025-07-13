@@ -21,9 +21,26 @@ data class ParcelServiceOptions @OptIn(ExperimentalUuidApi::class) constructor(
     val correspondsTo: String = Bundesland.CUSTOM.iso3166_2,
     val parcelLinkReference: String = Uuid.random().toString(),
     val license: License? = null,
-    val keys: List<ParcelKey> = listOf()
+    val keys: List<ParcelKey> = listOf(),
+    val synapseCatalyst: SynapseCatalystConfig = SynapseCatalystConfig(),
 ) : InflatedServiceOptions {
     companion object {
+        @Serializable
+        data class SynapseCatalystConfig(
+            val serversideOnly: Boolean = false,
+            val includeInAggregation: Boolean = true,
+            val includeInSpecific: Boolean = true,
+            val includeInMCP: Boolean = true,
+        ) {
+            init {
+                if (serversideOnly) {
+                    require(includeInSpecific) {
+                        "If the Service is Synapse Catalyst Serverside-Only, then includeInSpecific must be set to true."
+                    }
+                }
+            }
+        }
+
         @Serializable
         data class ParcelKey(
             val identifier: String,

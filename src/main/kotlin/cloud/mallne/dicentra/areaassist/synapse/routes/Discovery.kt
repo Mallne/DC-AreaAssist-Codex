@@ -1,9 +1,12 @@
 package cloud.mallne.dicentra.areaassist.synapse.routes
 
 import cloud.mallne.dicentra.areaassist.synapse.model.*
+import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.areaassist.synapse.service.APIDBService
 import cloud.mallne.dicentra.areaassist.synapse.statics.APIService
+import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionTransformationType
 import cloud.mallne.dicentra.areaassist.synapse.statics.verify
+import cloud.mallne.dicentra.aviator.koas.OpenAPI
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -50,36 +53,40 @@ fun Application.discovery() {
     val apiService by inject<APIDBService>()
     routing {
         authenticate(optional = true) {
-            get {
+            get("/services") {
                 val user: User? = call.authentication.principal()
-                val services = apiService.readForScope(null).toMutableList()
-                if (user != null) {
-                    val userServices = apiService.readForScopes(user.scopes)
-                    services.addAll(userServices)
+                if (call.queryParameters.contains("builtin")) {
+                    verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
+                    verify(user.access.admin || user.access.superAdmin) {
+                        HttpStatusCode.Forbidden to "You need to be at least admin to access the baked in Service Definitions!"
+                    }
+                    val discoveryResponse = DiscoveryResponse(
+                        user,
+                        APIService.apis,
+                        if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
+                    )
+                    call.respond(discoveryResponse)
+                } else {
+                    val services = apiService.readForScope(null).toMutableList()
+                    if (user != null) {
+                        val userServices = apiService.readForScopes(user.scopes)
+                        services.addAll(userServices)
+                    }
+                    val transformationType = ServiceDefinitionTransformationType.fromString(
+                        call.request.queryParameters["transformationType"]
+                            ?: ServiceDefinitionTransformationType.Auto.name
+                    )
+                    val definitions = aggregateTransformServices(transformationType, services)
+                    val response = DiscoveryResponse(
+                        user,
+                        services.map { it.serviceDefinition },
+                        if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
+                    )
+                    call.respond(response)
                 }
-                val response = DiscoveryResponse(
-                    user,
-                    services.map { it.serviceDefinition },
-                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
-                )
-                call.respond(response)
             }
         }
         authenticate(optional = false) {
-            get("/services") {
-                val user: User? = call.authentication.principal()
-                verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
-                verify(user.access.admin || user.access.superAdmin) {
-                    HttpStatusCode.Forbidden to "You need to be at least admin to access the baked in Service Definitions!"
-                }
-                val discoveryResponse = DiscoveryResponse(
-                    user,
-                    APIService.apis,
-                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
-                )
-                call.respond(discoveryResponse)
-            }
-
             get("/services/{id}") {
                 val id = call.parameters["id"]
                 verify(id != null) { HttpStatusCode.BadRequest to "You must enter an ID!" }
@@ -156,4 +163,36 @@ fun Application.discovery() {
             }
         }
     }
+}
+
+private fun aggregateTransformServices(
+    transformRule: ServiceDefinitionTransformationType,
+    allServices: List<APIServiceDTO>
+): List<OpenAPI> {
+    return when (transformRule) {
+        ServiceDefinitionTransformationType.Auto -> {}
+        ServiceDefinitionTransformationType.Local -> {
+            allServices.map { transformServiceToLocal(it) }
+        }
+
+        ServiceDefinitionTransformationType.Catalyst -> {
+            allServices.map { transformServiceToCatalyst(it) }
+        }
+
+        ServiceDefinitionTransformationType.CatalystAggregate -> {
+            transformServiceToCatalystAggregate(allServices)
+        }
+    }
+}
+
+private fun transformServiceToLocal(service: APIServiceDTO): OpenAPI {
+
+}
+
+private fun transformServiceToCatalyst(service: APIServiceDTO): OpenAPI {
+
+}
+
+private fun transformServiceToCatalystAggregate(services: List<APIServiceDTO>): List<OpenAPI> {
+
 }
