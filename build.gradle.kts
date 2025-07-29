@@ -47,19 +47,7 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
 
     //aviator
-    if (findProject(":aviator:clients:ktor") != null) {
-        implementation(project(":aviator:clients:ktor"))
-    } else {
-        implementation(libs.dc.aviator.clients.ktor)
-    }
-    if (findProject(":aviator:plugin:translation-keys") != null) {
-        implementation(project(":aviator:plugin:translation-keys"))
-    } else {
-        implementation(libs.dc.aviator.plugins.translationkeys)
-    }
-    if (findProject(":aviator:plugin:interception") != null) {
-        implementation(project(":aviator:plugin:interception"))
-    } else {
-        implementation(libs.dc.aviator.plugins.interception)
-    }
+    implementation(libs.dc.aviator.client.ktor)
+    implementation(libs.dc.aviator.plugin.translationkeys)
+    implementation(libs.dc.aviator.plugin.interception)
 }
