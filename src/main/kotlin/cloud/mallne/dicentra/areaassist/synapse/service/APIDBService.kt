@@ -2,6 +2,7 @@ package cloud.mallne.dicentra.areaassist.synapse.service
 
 import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.areaassist.synapse.statics.Serialization
+import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionTransformationType
 import cloud.mallne.dicentra.aviator.koas.OpenAPI
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IdTable
@@ -28,6 +29,13 @@ class APIDBService(private val databaseService: DatabaseService) {
         val service = jsonb<OpenAPI>("service", Serialization())
         val scope = varchar("scope", 255).nullable()
         val created = datetime("created").defaultExpression(CurrentDateTime)
+        val nativeTransformable = bool("native_transformable").default(true)
+        val catalystTransformable = bool("catalyst_transformable").default(true)
+        val aggregateApi = bool("aggregation_api").default(true)
+        val mcpEnabled = bool("mcp_enabled").default(true)
+        val preferredTransform = enumeration<ServiceDefinitionTransformationType>("preferred_transform").default(
+            ServiceDefinitionTransformationType.Auto
+        )
         override val id: Column<EntityID<String>> = varchar("id", 36).entityId()
     }
 
@@ -50,6 +58,12 @@ class APIDBService(private val databaseService: DatabaseService) {
             it[id] = apiService.id
             it[service] = apiService.serviceDefinition
             it[scope] = apiService.scope
+            it[created] = CurrentDateTime
+            it[nativeTransformable] = apiService.nativeTransformable
+            it[catalystTransformable] = apiService.catalystTransformable
+            it[aggregateApi] = apiService.aggregateApi
+            it[mcpEnabled] = apiService.mcpEnabled
+            it[preferredTransform] = apiService.preferredTransform
         }[APIServiceData.id].value
     }
 
@@ -65,9 +79,15 @@ class APIDBService(private val databaseService: DatabaseService) {
                 .where { APIServiceData.id eq id }
                 .map {
                     APIServiceDTO(
-                        it[APIServiceData.id].value,
-                        it[APIServiceData.service],
-                        it[APIServiceData.scope]
+                        id = it[APIServiceData.id].value,
+                        serviceDefinition = it[APIServiceData.service],
+                        scope = it[APIServiceData.scope],
+                        created = it[APIServiceData.created],
+                        nativeTransformable = it[APIServiceData.nativeTransformable],
+                        catalystTransformable = it[APIServiceData.catalystTransformable],
+                        aggregateApi = it[APIServiceData.aggregateApi],
+                        mcpEnabled = it[APIServiceData.mcpEnabled],
+                        preferredTransform = it[APIServiceData.preferredTransform],
                     )
                 }
                 .singleOrNull()
@@ -88,7 +108,13 @@ class APIDBService(private val databaseService: DatabaseService) {
                     APIServiceDTO(
                         it[APIServiceData.id].value,
                         it[APIServiceData.service],
-                        it[APIServiceData.scope]
+                        it[APIServiceData.scope],
+                        created = it[APIServiceData.created],
+                        nativeTransformable = it[APIServiceData.nativeTransformable],
+                        catalystTransformable = it[APIServiceData.catalystTransformable],
+                        aggregateApi = it[APIServiceData.aggregateApi],
+                        mcpEnabled = it[APIServiceData.mcpEnabled],
+                        preferredTransform = it[APIServiceData.preferredTransform],
                     )
                 }
         }
@@ -110,7 +136,13 @@ class APIDBService(private val databaseService: DatabaseService) {
                     APIServiceDTO(
                         it[APIServiceData.id].value,
                         it[APIServiceData.service],
-                        it[APIServiceData.scope]
+                        it[APIServiceData.scope],
+                        created = it[APIServiceData.created],
+                        nativeTransformable = it[APIServiceData.nativeTransformable],
+                        catalystTransformable = it[APIServiceData.catalystTransformable],
+                        aggregateApi = it[APIServiceData.aggregateApi],
+                        mcpEnabled = it[APIServiceData.mcpEnabled],
+                        preferredTransform = it[APIServiceData.preferredTransform],
                     )
                 }
         }
@@ -128,6 +160,11 @@ class APIDBService(private val databaseService: DatabaseService) {
             APIServiceData.update({ APIServiceData.id eq apiService.id }) {
                 it[service] = apiService.serviceDefinition
                 it[scope] = apiService.scope
+                it[nativeTransformable] = apiService.nativeTransformable
+                it[catalystTransformable] = apiService.catalystTransformable
+                it[aggregateApi] = apiService.aggregateApi
+                it[mcpEnabled] = apiService.mcpEnabled
+                it[preferredTransform] = apiService.preferredTransform
             }
         }
     }

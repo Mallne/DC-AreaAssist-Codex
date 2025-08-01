@@ -9,5 +9,4 @@ import kotlinx.serialization.Serializable
 data class DiscoveryResponse(
     val principal: User? = null,
     val services: List<OpenAPI>,
-    val oauth: OAuthConfigResponse? = null,
 )

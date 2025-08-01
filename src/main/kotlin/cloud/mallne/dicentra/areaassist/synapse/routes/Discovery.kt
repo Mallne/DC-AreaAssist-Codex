@@ -1,6 +1,9 @@
 package cloud.mallne.dicentra.areaassist.synapse.routes
 
-import cloud.mallne.dicentra.areaassist.synapse.model.*
+import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
+import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryRequest
+import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryResponse
+import cloud.mallne.dicentra.areaassist.synapse.model.User
 import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.areaassist.synapse.service.APIDBService
 import cloud.mallne.dicentra.areaassist.synapse.statics.APIService
@@ -63,7 +66,6 @@ fun Application.discovery() {
                     val discoveryResponse = DiscoveryResponse(
                         user,
                         APIService.apis,
-                        if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                     )
                     call.respond(discoveryResponse)
                 } else {
@@ -80,8 +82,8 @@ fun Application.discovery() {
                     val response = DiscoveryResponse(
                         user,
                         services.map { it.serviceDefinition },
-                        if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
-                    )
+
+                        )
                     call.respond(response)
                 }
             }
@@ -100,7 +102,6 @@ fun Application.discovery() {
                 val discoveryResponse = DiscoveryResponse(
                     user,
                     listOf(inDB.serviceDefinition),
-                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                 )
                 call.respond(discoveryResponse)
             }
@@ -114,7 +115,6 @@ fun Application.discovery() {
                 val discoveryResponse = DiscoveryResponse(
                     user,
                     inDB.map { it.serviceDefinition },
-                    if (config.security.enabled) OAuthConfigResponse(config.security.app) else null
                 )
                 call.respond(discoveryResponse)
             }
@@ -135,7 +135,6 @@ fun Application.discovery() {
                     verify(user.access.superAdmin || (user.access.admin && user.scopes.contains(inDB.scope)) || user.userScope == body.forScope) {
                         HttpStatusCode.Forbidden to "The Service Definition with the id: ${body.id} is already in DB and you are not eligible to alter this resource!"
                     }
-
                     apiService.update(body.toDTO())
                 } else {
                     apiService.create(body.toDTO())
@@ -171,7 +170,7 @@ private fun aggregateTransformServices(
 ): List<OpenAPI> {
     return when (transformRule) {
         ServiceDefinitionTransformationType.Auto -> {}
-        ServiceDefinitionTransformationType.Local -> {
+        ServiceDefinitionTransformationType.Native -> {
             allServices.map { transformServiceToLocal(it) }
         }
 

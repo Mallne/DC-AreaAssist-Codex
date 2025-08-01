@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ServiceDefinitionTransformationType {
-    Auto, Local, Catalyst, CatalystAggregate;
+    Auto, Native, Catalyst, CatalystAggregate;
 
     companion object {
         fun fromString(value: String): ServiceDefinitionTransformationType {
