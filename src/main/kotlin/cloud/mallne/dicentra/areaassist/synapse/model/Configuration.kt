@@ -1,6 +1,7 @@
 package cloud.mallne.dicentra.areaassist.synapse.model
 
 import cloud.mallne.dicentra.areaassist.synapse.helper.toBooleanish
+import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionTransformationType
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 
@@ -11,6 +12,15 @@ class Configuration(
     val data = DatabaseConfiguration(application)
     val server = ServerConfiguration(application)
     val catalyst = CatalystConfiguration(application)
+    val preferredTransform: ServiceDefinitionTransformationType = ServiceDefinitionTransformationType.fromString(
+        application.environment.config.tryGetString("preferredTransform")
+            ?: ServiceDefinitionTransformationType.Native.name
+    )
+
+    init {
+        require(preferredTransform != ServiceDefinitionTransformationType.Auto) { "Auto is not an allowed preferred transform" }
+        require(preferredTransform.canUseTransform(this)) { "Preferred transform is not allowed" }
+    }
 
     companion object Nested {
         class ServerConfiguration(application: Application) {
@@ -73,7 +83,7 @@ class Configuration(
             val url = application.environment.config.tryGetString("data.url") ?: ""
             val user = application.environment.config.tryGetString("data.user") ?: ""
             val password = application.environment.config.tryGetString("data.password") ?: ""
-            val schema = application.environment.config.tryGetString("data.schema") ?: "areaassist_synapse"
+            val schema = application.environment.config.tryGetString("data.schema") ?: "synapse"
         }
     }
 }
