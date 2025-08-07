@@ -5,11 +5,14 @@ import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryRequest
 import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryResponse
 import cloud.mallne.dicentra.areaassist.synapse.model.User
 import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO
+import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO.Companion.transform
 import cloud.mallne.dicentra.areaassist.synapse.service.APIDBService
 import cloud.mallne.dicentra.areaassist.synapse.statics.APIService
+import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionGroupRule
 import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionTransformationType
 import cloud.mallne.dicentra.areaassist.synapse.statics.verify
 import cloud.mallne.dicentra.aviator.koas.OpenAPI
+import cloud.mallne.dicentra.aviator.model.AviatorServiceUtils
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -78,6 +81,12 @@ fun Application.discovery() {
                         call.request.queryParameters["transformationType"]
                             ?: ServiceDefinitionTransformationType.Auto.name
                     )
+
+                    val groupRule = ServiceDefinitionGroupRule.fromString(
+                        call.request.queryParameters["groupRule"]
+                            ?: ServiceDefinitionGroupRule.ServiceLocator.name
+                    )
+
                     val definitions = aggregateTransformServices(transformationType, services)
                     val response = DiscoveryResponse(
                         user,
@@ -165,21 +174,24 @@ fun Application.discovery() {
 }
 
 private fun aggregateTransformServices(
-    transformRule: ServiceDefinitionTransformationType,
+    configuration: Configuration,
+    requestedTransformationType: ServiceDefinitionTransformationType = ServiceDefinitionTransformationType.Auto,
+    requestedRule: ServiceDefinitionGroupRule? = null,
     allServices: List<APIServiceDTO>
 ): List<OpenAPI> {
+    allServices.forEach {
+        val transform = it.transformOrNull(configuration, requestedTransformationType)
+        val rule = if (transform == ServiceDefinitionTransformationType.Catalyst) it.ruleOrNull(requestedRule) else null
+        val locators = AviatorServiceUtils.extractServiceLocators(it.serviceDefinition)
+    }
     return when (transformRule) {
-        ServiceDefinitionTransformationType.Auto -> {}
+        ServiceDefinitionTransformationType.Auto ->
         ServiceDefinitionTransformationType.Native -> {
             allServices.map { transformServiceToLocal(it) }
         }
 
         ServiceDefinitionTransformationType.Catalyst -> {
             allServices.map { transformServiceToCatalyst(it) }
-        }
-
-        ServiceDefinitionTransformationType.CatalystAggregate -> {
-            transformServiceToCatalystAggregate(allServices)
         }
     }
 }
@@ -189,9 +201,5 @@ private fun transformServiceToLocal(service: APIServiceDTO): OpenAPI {
 }
 
 private fun transformServiceToCatalyst(service: APIServiceDTO): OpenAPI {
-
-}
-
-private fun transformServiceToCatalystAggregate(services: List<APIServiceDTO>): List<OpenAPI> {
 
 }

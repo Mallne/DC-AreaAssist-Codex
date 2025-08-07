@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.dc.aviator.client.ktor)
     implementation(libs.dc.aviator.plugin.translationkeys)
     implementation(libs.dc.aviator.plugin.interception)
+    implementation(libs.dc.aviator.plugin.weaver)
 }

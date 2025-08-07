@@ -19,7 +19,7 @@ class Configuration(
 
     init {
         require(preferredTransform != ServiceDefinitionTransformationType.Auto) { "Auto is not an allowed preferred transform" }
-        require(preferredTransform.canUseTransform(this)) { "Preferred transform is not allowed" }
+        require(preferredTransform.canUse(this)) { "Preferred transform is not allowed" }
     }
 
     companion object Nested {
@@ -41,6 +41,10 @@ class Configuration(
             val enabled = application.environment.config.tryGetString("catalyst.enabled")?.toBooleanish() ?: true
             val anonymous = application.environment.config.tryGetString("catalyst.anonymous")?.toBooleanish() ?: true
             val aggregation = CatalystAggregationConfiguration(application)
+            val serverName = application.environment.config.tryGetString("catalyst.serverName") ?: application.environment.config.tryGetString("server.hostname") ?: "0.0.0.0"
+            val tlsEnabled = application.environment.config.tryGetString("catalyst.tlsEnabled")?.toBooleanish() ?: true
+            val title = application.environment.config.tryGetString("catalyst.title") ?: "Synapse Catalyst"
+            val description = application.environment.config.tryGetString("catalyst.description") ?: "Make Requests to a stored Service in a single Tenant setup."
 
             companion object Nested {
                 class CatalystAggregationConfiguration(application: Application) {

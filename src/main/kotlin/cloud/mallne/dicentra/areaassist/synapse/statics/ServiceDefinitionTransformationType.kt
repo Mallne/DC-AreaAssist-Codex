@@ -5,15 +5,23 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ServiceDefinitionTransformationType {
-    Auto, Native, Catalyst, CatalystAggregate;
+    Auto, Native, Catalyst;
 
-    fun canUseTransform(
+    fun distill(
         config: Configuration,
+        preferred: ServiceDefinitionTransformationType = config.preferredTransform,
+    ): ServiceDefinitionTransformationType? {
+        val finalType = if (this == Auto) if (preferred == Auto) config.preferredTransform else preferred else this
+        return if (finalType == Auto) null else finalType
+    }
+
+    fun canUse(
+        config: Configuration,
+        preferred: ServiceDefinitionTransformationType = config.preferredTransform,
         native: Boolean = true,
         catalyst: Boolean = config.catalyst.enabled,
-        aggregate: Boolean = config.catalyst.aggregation.enabled,
     ): Boolean {
-        val finalType = if (this == Auto) config.preferredTransform else this
+        val finalType = distill(config, preferred)
         return when (finalType) {
             Native -> {
                 native
@@ -21,10 +29,6 @@ enum class ServiceDefinitionTransformationType {
 
             Catalyst -> {
                 catalyst && config.catalyst.enabled
-            }
-
-            CatalystAggregate -> {
-                aggregate && config.catalyst.aggregation.enabled
             }
 
             else -> false
