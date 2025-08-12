@@ -1,11 +1,12 @@
 package cloud.mallne.dicentra.areaassist.synapse.model.dto
 
 import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
+import cloud.mallne.dicentra.areaassist.synapse.model.dto.ServiceBundle.Companion.buildBundles
+import cloud.mallne.dicentra.areaassist.synapse.service.CatalystGenerator
 import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionGroupRule
 import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionTransformationType
 import cloud.mallne.dicentra.aviator.koas.OpenAPI
 import cloud.mallne.dicentra.aviator.model.AviatorServiceUtils
-import cloud.mallne.dicentra.aviator.model.ServiceLocator
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -23,7 +24,6 @@ data class APIServiceDTO @OptIn(ExperimentalUuidApi::class, ExperimentalTime::cl
     val created: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
     val nativeTransformable: Boolean = true,
     val catalystTransformable: Boolean = true,
-    val aggregateApi: Boolean = true,
     val explicitOnly: Boolean = false,
     val mcpEnabled: Boolean = true,
     val preferredTransform: ServiceDefinitionTransformationType = ServiceDefinitionTransformationType.Auto,
@@ -42,7 +42,6 @@ data class APIServiceDTO @OptIn(ExperimentalUuidApi::class, ExperimentalTime::cl
     ): ServiceDefinitionGroupRule? {
         if (!catalystTransformable) return null
         if (explicitOnly) return ServiceDefinitionGroupRule.Single
-        if (preferred == ServiceDefinitionGroupRule.All && !aggregateApi) return null
         return preferred ?: ServiceDefinitionGroupRule.ServiceLocator
     }
 
@@ -51,7 +50,7 @@ data class APIServiceDTO @OptIn(ExperimentalUuidApi::class, ExperimentalTime::cl
     }
 
     companion object {
-        fun List<APIServiceDTO>.transform(
+        fun List<APIServiceDTO>.transformGroups(
             configuration: Configuration,
             requestedTransformationType: ServiceDefinitionTransformationType = ServiceDefinitionTransformationType.Auto,
             requestedRule: ServiceDefinitionGroupRule? = null,
@@ -65,6 +64,7 @@ data class APIServiceDTO @OptIn(ExperimentalUuidApi::class, ExperimentalTime::cl
                     if (transform != null) {
                         ServiceBundle(
                             service = it,
+                            route = route,
                             locator = locator,
                             transformationType = transform,
                             groupRule = rule,
@@ -73,6 +73,16 @@ data class APIServiceDTO @OptIn(ExperimentalUuidApi::class, ExperimentalTime::cl
                 }
                 bundles
             }
+        }
+
+        fun List<APIServiceDTO>.transform(
+            requestedTransformationType: ServiceDefinitionTransformationType = ServiceDefinitionTransformationType.Auto,
+            requestedRule: ServiceDefinitionGroupRule? = null,
+            catalystGenerator: CatalystGenerator
+        ): List<OpenAPI> {
+            val catalystTransforms =
+                this.transformGroups(catalystGenerator.configuration, requestedTransformationType, requestedRule)
+            return catalystTransforms.buildBundles(catalystGenerator)
         }
 
         fun List<APIServiceDTO>.locatorGroups(): LocatorGroupBundle {

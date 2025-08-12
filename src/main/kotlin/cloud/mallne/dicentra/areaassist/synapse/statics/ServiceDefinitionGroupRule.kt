@@ -1,17 +1,13 @@
 package cloud.mallne.dicentra.areaassist.synapse.statics
 
-import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
-import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO
 import kotlinx.serialization.Serializable
 
 @Serializable
 enum class ServiceDefinitionGroupRule {
-    Single, ServiceLocator, All;
+    Single, ServiceLocator;
 
     companion object {
-        fun inferFrom() {
 
-        }
         fun fromString(value: String): ServiceDefinitionGroupRule {
             return fromStringOrNull(value) ?: ServiceLocator
         }

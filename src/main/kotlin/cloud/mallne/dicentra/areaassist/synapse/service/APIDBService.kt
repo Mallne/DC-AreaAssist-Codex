@@ -31,7 +31,6 @@ class APIDBService(private val databaseService: DatabaseService) {
         val created = datetime("created").defaultExpression(CurrentDateTime)
         val nativeTransformable = bool("native_transformable").default(true)
         val catalystTransformable = bool("catalyst_transformable").default(true)
-        val aggregateApi = bool("aggregation_api").default(true)
         val mcpEnabled = bool("mcp_enabled").default(true)
         val preferredTransform = enumeration<ServiceDefinitionTransformationType>("preferred_transform").default(
             ServiceDefinitionTransformationType.Auto
@@ -61,7 +60,6 @@ class APIDBService(private val databaseService: DatabaseService) {
             it[created] = CurrentDateTime
             it[nativeTransformable] = apiService.nativeTransformable
             it[catalystTransformable] = apiService.catalystTransformable
-            it[aggregateApi] = apiService.aggregateApi
             it[mcpEnabled] = apiService.mcpEnabled
             it[preferredTransform] = apiService.preferredTransform
         }[APIServiceData.id].value
@@ -85,7 +83,6 @@ class APIDBService(private val databaseService: DatabaseService) {
                         created = it[APIServiceData.created],
                         nativeTransformable = it[APIServiceData.nativeTransformable],
                         catalystTransformable = it[APIServiceData.catalystTransformable],
-                        aggregateApi = it[APIServiceData.aggregateApi],
                         mcpEnabled = it[APIServiceData.mcpEnabled],
                         preferredTransform = it[APIServiceData.preferredTransform],
                     )
@@ -112,7 +109,6 @@ class APIDBService(private val databaseService: DatabaseService) {
                         created = it[APIServiceData.created],
                         nativeTransformable = it[APIServiceData.nativeTransformable],
                         catalystTransformable = it[APIServiceData.catalystTransformable],
-                        aggregateApi = it[APIServiceData.aggregateApi],
                         mcpEnabled = it[APIServiceData.mcpEnabled],
                         preferredTransform = it[APIServiceData.preferredTransform],
                     )
@@ -140,7 +136,6 @@ class APIDBService(private val databaseService: DatabaseService) {
                         created = it[APIServiceData.created],
                         nativeTransformable = it[APIServiceData.nativeTransformable],
                         catalystTransformable = it[APIServiceData.catalystTransformable],
-                        aggregateApi = it[APIServiceData.aggregateApi],
                         mcpEnabled = it[APIServiceData.mcpEnabled],
                         preferredTransform = it[APIServiceData.preferredTransform],
                     )
@@ -162,7 +157,6 @@ class APIDBService(private val databaseService: DatabaseService) {
                 it[scope] = apiService.scope
                 it[nativeTransformable] = apiService.nativeTransformable
                 it[catalystTransformable] = apiService.catalystTransformable
-                it[aggregateApi] = apiService.aggregateApi
                 it[mcpEnabled] = apiService.mcpEnabled
                 it[preferredTransform] = apiService.preferredTransform
             }

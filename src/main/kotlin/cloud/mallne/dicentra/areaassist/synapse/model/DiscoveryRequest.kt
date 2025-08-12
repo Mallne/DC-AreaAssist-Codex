@@ -33,7 +33,6 @@ data class DiscoveryRequest @OptIn(ExperimentalUuidApi::class) constructor(
         serviceDefinition = service,
         nativeTransformable = nativeTransformable,
         catalystTransformable = catalystTransformable,
-        aggregateApi = aggregateApi,
         mcpEnabled = mcpEnabled,
         preferredTransform = preferredTransform,
     )

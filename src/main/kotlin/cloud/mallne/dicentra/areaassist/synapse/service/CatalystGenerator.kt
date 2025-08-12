@@ -1,7 +1,6 @@
-package cloud.mallne.dicentra.areaassist.synapse.model.dto
+package cloud.mallne.dicentra.areaassist.synapse.service
 
 import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
-import cloud.mallne.dicentra.areaassist.synapse.model.ParcelServiceOptions
 import cloud.mallne.dicentra.areaassist.synapse.statics.Serialization
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-pluginMaterialization`
@@ -12,24 +11,21 @@ import cloud.mallne.dicentra.aviator.core.ServiceOptions
 import cloud.mallne.dicentra.aviator.koas.OpenAPI
 import cloud.mallne.dicentra.aviator.koas.Operation
 import cloud.mallne.dicentra.aviator.koas.PathItem
-import cloud.mallne.dicentra.aviator.koas.extensions.ReferenceOr
 import cloud.mallne.dicentra.aviator.koas.info.Info
-import cloud.mallne.dicentra.aviator.koas.parameters.Parameter
 import cloud.mallne.dicentra.aviator.koas.servers.Server
 import cloud.mallne.dicentra.aviator.koas.typed.Route
 import cloud.mallne.dicentra.aviator.model.AviatorServiceUtils
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
-import cloud.mallne.dicentra.aviator.plugin.synapse.CatalystRequest
 import cloud.mallne.dicentra.aviator.plugin.synapse.SynapsePlugin
 import cloud.mallne.dicentra.aviator.plugin.synapse.SynapsePluginConfig
 import cloud.mallne.dicentra.aviator.plugin.weaver.WeaverServiceObject
-import io.ktor.http.URLBuilder
-import io.ktor.http.encodeURLParameter
+import io.ktor.http.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
-import java.net.URLEncoder
+import org.koin.core.annotation.Single
 
+@Single
 class CatalystGenerator(
     val configuration: Configuration,
     val json: Json = Serialization(),
@@ -40,7 +36,8 @@ class CatalystGenerator(
     ): Pair<String, PathItem> {
         val rawOptions = route.`x-dicentra-aviator-serviceOptions`
         val rawLocator = route.`x-dicentra-aviator-serviceDelegateCall`
-        val locator = rawLocator?.let { ServiceLocator(it) } ?: throw IllegalArgumentException("Service Locator is required")
+        val locator =
+            rawLocator?.let { ServiceLocator(it) } ?: throw IllegalArgumentException("Service Locator is required")
         //filter out potential weaver translation schema
         val options = if (rawOptions != null) {
             try {
@@ -56,13 +53,13 @@ class CatalystGenerator(
             SynapsePlugin.identity to json.encodeToJsonElement(SynapsePluginConfig(true))
         )
         return "/catalyst$queryParams" to PathItem(
-                    post = Operation(
-                        extensions = mapOf(
-                            AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
-                            AviatorExtensionSpec.ServiceOptions.O.key to options,
-                            AviatorExtensionSpec.PluginMaterialization.O.key to json.encodeToJsonElement(plugins)
-                        ),
-                    )
+            post = Operation(
+                extensions = mapOf(
+                    AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
+                    AviatorExtensionSpec.ServiceOptions.O.key to options,
+                    AviatorExtensionSpec.PluginMaterialization.O.key to json.encodeToJsonElement(plugins)
+                ),
+            )
         )
     }
 

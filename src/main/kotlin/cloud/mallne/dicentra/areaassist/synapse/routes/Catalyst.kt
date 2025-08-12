@@ -3,8 +3,11 @@ package cloud.mallne.dicentra.areaassist.synapse.routes
 import cloud.mallne.dicentra.areaassist.synapse.model.Configuration
 import cloud.mallne.dicentra.areaassist.synapse.model.DiscoveryResponse
 import cloud.mallne.dicentra.areaassist.synapse.model.User
+import cloud.mallne.dicentra.areaassist.synapse.model.dto.APIServiceDTO.Companion.transform
 import cloud.mallne.dicentra.areaassist.synapse.service.APIDBService
+import cloud.mallne.dicentra.areaassist.synapse.service.CatalystGenerator
 import cloud.mallne.dicentra.areaassist.synapse.statics.APIService
+import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionGroupRule
 import cloud.mallne.dicentra.areaassist.synapse.statics.ServiceDefinitionTransformationType
 import cloud.mallne.dicentra.areaassist.synapse.statics.verify
 import io.ktor.http.*
@@ -16,6 +19,7 @@ import org.koin.ktor.ext.inject
 
 fun Application.catalyst() {
     val config by inject<Configuration>()
+    val catalystGenerator by inject<CatalystGenerator>()
     val apiService by inject<APIDBService>()
     routing {
         authenticate(optional = true) {
@@ -41,12 +45,20 @@ fun Application.catalyst() {
                         call.request.queryParameters["transformationType"]
                             ?: ServiceDefinitionTransformationType.Auto.name
                     )
-                    val definitions = aggregateTransformServices(transformationType, services)
+
+                    val groupRule = ServiceDefinitionGroupRule.fromString(
+                        call.request.queryParameters["groupRule"]
+                            ?: ServiceDefinitionGroupRule.ServiceLocator.name
+                    )
+                    val definitions = services.transform(
+                        requestedTransformationType = transformationType,
+                        requestedRule = groupRule,
+                        catalystGenerator = catalystGenerator,
+                    )
                     val response = DiscoveryResponse(
                         user,
-                        services.map { it.serviceDefinition },
-
-                        )
+                        definitions,
+                    )
                     call.respond(response)
                 }
             }

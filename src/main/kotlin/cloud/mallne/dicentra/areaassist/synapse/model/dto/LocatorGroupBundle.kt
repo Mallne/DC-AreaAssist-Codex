@@ -1,6 +1,5 @@
 package cloud.mallne.dicentra.areaassist.synapse.model.dto
 
-import cloud.mallne.dicentra.aviator.koas.OpenAPI
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
 
 data class LocatorGroupBundle(
@@ -26,8 +25,4 @@ data class LocatorGroupBundle(
         }
         return LocatorGroupBundle(collidingServices)
     }
-
-    fun catalyst
 }
-
-// catalyst?locators=kajgh,kagh&ids=dksjgbh
