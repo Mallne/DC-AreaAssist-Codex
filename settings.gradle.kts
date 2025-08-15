@@ -13,10 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "synapse"
-
-include(":core")
-include(":host")
+rootProject.name = "Codex"
 
 val aviatorDir = file("../../aviator")
 if (aviatorDir.exists()) {
@@ -30,5 +27,16 @@ if (aviatorDir.exists()) {
         }
     }
 } else {
-    println("[SYNAPSE:aviator] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
+    println("[AREAASSIST_CODEX:aviator] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
+}
+
+val synapseDir = file("../../synapse")
+if (synapseDir.exists()) {
+    includeBuild(synapseDir.absolutePath) {
+        dependencySubstitution {
+            substitute(module("cloud.mallne.dicentra.synapse:core")).using(project(":core"))
+        }
+    }
+} else {
+    println("[AREAASSIST_CODEX:synapse] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
 }
