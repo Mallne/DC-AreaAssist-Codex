@@ -1,7 +1,7 @@
 [versions]
 android-minSdk = "28"
 android-compileSdk = "35"
-agp = "8.10.1"
+agp = "8.11.0"
 exposed-version = "0.61.0"
 koin = "4.1.0"
 koin-annotations = "2.1.0"

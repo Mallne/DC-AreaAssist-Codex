@@ -15,6 +15,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "synapse"
 
+include(":core")
+include(":host")
+
 val aviatorDir = file("../../aviator")
 if (aviatorDir.exists()) {
     includeBuild(aviatorDir.absolutePath) {
