@@ -1,21 +1,21 @@
 [versions]
 android-minSdk = "28"
 android-compileSdk = "35"
-agp = "8.11.0"
+agp = "8.12.0"
 exposed-version = "0.61.0"
 koin = "4.1.0"
 koin-annotations = "2.1.0"
-ksp = "2.2.0-2.0.2"
-kotlin = "2.2.0"
-ktor = "3.2.1"
+ksp = "2.2.10-2.0.2"
+kotlin = "2.2.10"
+ktor = "3.2.3"
 logback-version = "1.5.18"
 serialization = "1.9.0"
 dc-polyfill = "1.0.0-SNAPSHOT"
 dc-aviator = "1.0.0-SNAPSHOT"
 dc-weaver = "1.0.0-SNAPSHOT"
 postgres = "42.7.7"
-kotlinx-datetime = "0.7.1"
-mcp = "0.5.0"
+kotlinx-datetime = "0.7.1-0.6.x-compat"
+mcp = "0.6.0"
 
 [libraries]
 koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
@@ -71,4 +71,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kjvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kmp = { id = "org.jetbrains.kotlin.multiplatform" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.33.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
