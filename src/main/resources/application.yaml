@@ -37,7 +37,7 @@ security:
     issuer: "$SECURITY_ISSUER:"
     scopes: "$SECURITY_APP_SCOPES:"
     client_id: "$SECURITY_APP_CLIENTID:"
-  roles:
-    user: "$SECURITY_ROLES_USER:"
-    admin: "$SECURITY_ROLES_ADMIN:"
-    superadmin: "$SECURITY_ROLES_SUPERADMIN:"
+  groups:
+    user: "$SECURITY_GROUPS_USER:"
+    admin: "$SECURITY_GROUPS_ADMIN:"
+    superadmin: "$SECURITY_GROUPS_SUPERADMIN:"

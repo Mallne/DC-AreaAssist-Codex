@@ -3,6 +3,6 @@ GET {{server}}
 #Authorization: Bearer {{$auth.token("keycloak")}}
 
 ### GET all Baked in Services
-GET {{server}}/baked
-#Authorization: Bearer {{$auth.token("keycloak")}}
+GET {{server}}/services/builtin
+Authorization: Bearer {{$auth.token("keycloak")}}
 Accept: application/json
