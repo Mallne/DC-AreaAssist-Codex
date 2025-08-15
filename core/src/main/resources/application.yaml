@@ -1,0 +1,43 @@
+ktor:
+  application:
+    modules:
+      - cloud.mallne.dicentra.areaassist.synapse.ApplicationKt.module
+  deployment:
+    port: 8080
+
+server:
+  hostname: "$HOSTNAME:"
+  cors:
+    all: "$CORS_ALL:false"
+    hosts: "$CORS_HOSTS:"
+
+data:
+  url: "$DATA_URL"
+  user: "$DATA_USER"
+  password: "$DATA_PASSWORD"
+  schema: "$DATA_SCHEMA:synapse"
+
+catalyst:
+  enabled: "$CATALYST_ENABLED:true"
+  anonymous: "$CATALYST_ANONYMOUS:true"
+  server_name: "$CATALYST_SERVERNAME:"
+  tls_enabled: "$CATALYST_TLSENABLED:true"
+  title: "$CATALYST_TITLE:Synapse Catalyst"
+  description: "$CATALYST_DESCRIPTION:Make Requests to a stored Service in a single Tenant setup."
+
+preferred_transform: "$PREFERRED_TRANSFORM:Native"
+
+security:
+  enabled: "$SECURITY_ENABLED:false"
+  issuer: "$SECURITY_ISSUER:"
+  scopes: "$SECURITY_SCOPES:"
+  client_id: "$SECURITY_CLIENTID:"
+  client_secret: "$SECURITY_CLIENTSECRET:"
+  app:
+    issuer: "$SECURITY_ISSUER:"
+    scopes: "$SECURITY_APP_SCOPES:"
+    client_id: "$SECURITY_APP_CLIENTID:"
+  roles:
+    user: "$SECURITY_ROLES_USER:"
+    admin: "$SECURITY_ROLES_ADMIN:"
+    superadmin: "$SECURITY_ROLES_SUPERADMIN:"
