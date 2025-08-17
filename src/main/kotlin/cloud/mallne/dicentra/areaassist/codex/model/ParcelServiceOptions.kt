@@ -1,7 +1,8 @@
 package cloud.mallne.dicentra.areaassist.codex.model
 
 import cloud.mallne.dicentra.areaassist.codex.statics.SISystems
-import cloud.mallne.dicentra.areaassist.codex.statics.bundeslaender.Bundesland
+import cloud.mallne.dicentra.areaassist.model.Point
+import cloud.mallne.dicentra.areaassist.statics.bundeslaender.Bundesland
 import cloud.mallne.dicentra.synapse.statics.Serialization
 import cloud.mallne.dicentra.polyfill.Validation
 import cloud.mallne.dicentra.aviator.core.InflatedServiceOptions

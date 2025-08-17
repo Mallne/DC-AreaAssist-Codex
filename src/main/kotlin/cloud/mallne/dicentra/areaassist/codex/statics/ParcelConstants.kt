@@ -1,7 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex.statics
 
 import cloud.mallne.dicentra.areaassist.codex.model.ParcelServiceOptions
-import cloud.mallne.dicentra.areaassist.codex.statics.bundeslaender.Bundesland
+import cloud.mallne.dicentra.areaassist.statics.bundeslaender.Bundesland
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.koas.Operation
@@ -300,7 +300,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.THUERINGEN.definition.roughBoundaries,
+                    bounds = Bundesland.THUERINGEN.roughBoundaries,
                     correspondsTo = Bundesland.THUERINGEN.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "flaeche",
@@ -338,7 +338,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.SACHSEN.definition.roughBoundaries,
+                    bounds = Bundesland.SACHSEN.roughBoundaries,
                     correspondsTo = Bundesland.SACHSEN.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "AREA_m2",
@@ -365,7 +365,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.BRANDENBURG.definition.roughBoundaries,
+                    bounds = Bundesland.BRANDENBURG.roughBoundaries,
                     correspondsTo = Bundesland.BRANDENBURG.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "flaeche",
@@ -394,7 +394,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.HESSEN.definition.roughBoundaries,
+                    bounds = Bundesland.HESSEN.roughBoundaries,
                     correspondsTo = Bundesland.HESSEN.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "amtlicheFlaeche",
@@ -417,7 +417,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.HAMBURG.definition.roughBoundaries,
+                    bounds = Bundesland.HAMBURG.roughBoundaries,
                     correspondsTo = Bundesland.HAMBURG.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "areaValue",
@@ -442,7 +442,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.NORDRHEIN_WESTFALEN.definition.roughBoundaries,
+                    bounds = Bundesland.NORDRHEIN_WESTFALEN.roughBoundaries,
                     correspondsTo = Bundesland.NORDRHEIN_WESTFALEN.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "amtlicheFlaeche",
@@ -466,7 +466,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.SACHSEN_ANHALT.definition.roughBoundaries,
+                    bounds = Bundesland.SACHSEN_ANHALT.roughBoundaries,
                     correspondsTo = Bundesland.SACHSEN_ANHALT.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "flaeche",
@@ -497,7 +497,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.BERLIN.definition.roughBoundaries,
+                    bounds = Bundesland.BERLIN.roughBoundaries,
                     correspondsTo = Bundesland.BERLIN.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         area = "afl",
@@ -526,7 +526,7 @@ object ParcelConstants {
             extensions = mapOf(
                 AviatorExtensionSpec.ServiceLocator.O.key to locator.usable(),
                 AviatorExtensionSpec.ServiceOptions.O.key to ParcelServiceOptions(
-                    bounds = Bundesland.NIEDERSACHSEN.definition.roughBoundaries,
+                    bounds = Bundesland.NIEDERSACHSEN.roughBoundaries,
                     correspondsTo = Bundesland.NIEDERSACHSEN.iso3166_2,
                     keys = DefaultKeys.fillIn(
                         district = "gmk__bez",

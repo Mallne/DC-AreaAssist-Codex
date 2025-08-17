@@ -10,6 +10,7 @@ dc-aviator = "1.0.0-SNAPSHOT"
 dc-polyfill = "1.0.0-SNAPSHOT"
 dc-synapse = "0.0.1"
 dc-weaver = "1.0.0-SNAPSHOT"
+dc-areaassist = "1.0.0-SNAPSHOT"
 dependency-analysis-v = "2.19.0"
 exposed-version = "0.61.0"
 koin = "4.1.0"
@@ -25,6 +26,7 @@ serialization = "1.9.0"
 version-catalog-update-v = "1.0.0"
 
 [libraries]
+dc-areaassist-shared = { module = "cloud.mallne.dicentra.areaassist:shared", version.ref = "dc-areaassist" }
 dc-aviator-client-ktor = { module = "cloud.mallne.dicentra.aviator.client:ktor", version.ref = "dc-aviator" }
 dc-aviator-core = { module = "cloud.mallne.dicentra.aviator:core", version.ref = "dc-aviator" }
 dc-aviator-koas = { module = "cloud.mallne.dicentra.aviator:koas", version.ref = "dc-aviator" }

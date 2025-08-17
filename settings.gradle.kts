@@ -41,3 +41,14 @@ if (synapseDir.exists()) {
     println("[AREAASSIST_CODEX:synapse] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
 }
 
+val sharedDir = file("../shared")
+if (sharedDir.exists()) {
+    includeBuild(sharedDir.absolutePath) {
+        dependencySubstitution {
+            substitute(module("cloud.mallne.dicentra.areaassist:shared")).using(project(":"))
+        }
+    }
+} else {
+    println("[AREAASSIST_CODEX:shared] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
+}
+

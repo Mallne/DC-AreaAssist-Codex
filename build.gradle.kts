@@ -1,4 +1,5 @@
 import nl.littlerobots.vcu.plugin.resolver.VersionSelectors
+
 plugins {
     alias(libs.plugins.kjvm)
     alias(libs.plugins.android.library) apply false
@@ -28,6 +29,7 @@ application {
 }
 
 dependencies {
+    implementation(libs.dc.areaassist.shared)
     ksp(libs.koin.ksp)
     implementation(libs.dc.synapse.core)
 }
