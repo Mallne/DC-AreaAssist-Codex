@@ -1,76 +1,85 @@
 [versions]
-android-minSdk = "28"
-android-compileSdk = "36"
+# @pin
 agp = "8.11.0"
+# @keep
+android-compileSdk = "36"
+# @keep
+android-minSdk = "24"
+ben-manes-versions-v = "0.52.0"
+dc-aviator = "1.0.0-SNAPSHOT"
+dc-polyfill = "1.0.0-SNAPSHOT"
+dc-synapse = "0.0.1"
+dc-weaver = "1.0.0-SNAPSHOT"
+dependency-analysis-v = "2.19.0"
 exposed-version = "0.61.0"
 koin = "4.1.0"
 koin-annotations = "2.1.0"
-ksp = "2.2.10-2.0.2"
 kotlin = "2.2.10"
+kotlinx-datetime = "0.7.1"
+ksp = "2.2.10-2.0.2"
 ktor = "3.2.3"
 logback-version = "1.5.18"
-serialization = "1.9.0"
-dc-polyfill = "1.0.0-SNAPSHOT"
-dc-aviator = "1.0.0-SNAPSHOT"
-dc-synapse = "1.0.0-SNAPSHOT"
-dc-weaver = "1.0.0-SNAPSHOT"
-postgres = "42.7.7"
-kotlinx-datetime = "0.7.1"
 mcp = "0.6.0"
+postgres = "42.7.7"
+serialization = "1.9.0"
+version-catalog-update-v = "1.0.0"
 
 [libraries]
-koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
-koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
-koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotations" }
-koin-ksp = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotations" }
-ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
-exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
-exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
-exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed-version" }
-exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed-version" }
-postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
-ktor-http = { module = "io.ktor:ktor-http", version.ref = "ktor" }
-ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor" }
-ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response", version.ref = "ktor" }
-ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
-ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
-ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor" }
-ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
-ktor-server-forwarded-header = { module = "io.ktor:ktor-server-forwarded-header", version.ref = "ktor" }
-ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
-ktor-server-caching-headers = { module = "io.ktor:ktor-server-caching-headers", version.ref = "ktor" }
-ktor-server-compression = { module = "io.ktor:ktor-server-compression", version.ref = "ktor" }
-ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
-logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
-ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
-ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
-kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-mcp = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp" }
-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
-dc-polyfill = { module = "cloud.mallne.dicentra:polyfill", version.ref = "dc-polyfill" }
+dc-aviator-client-ktor = { module = "cloud.mallne.dicentra.aviator.client:ktor", version.ref = "dc-aviator" }
 dc-aviator-core = { module = "cloud.mallne.dicentra.aviator:core", version.ref = "dc-aviator" }
 dc-aviator-koas = { module = "cloud.mallne.dicentra.aviator:koas", version.ref = "dc-aviator" }
-dc-weaver-tokenizer = { module = "cloud.mallne.dicentra.weaver:tokenizer", version.ref = "dc-weaver" }
-dc-weaver-core = { module = "cloud.mallne.dicentra.weaver:core", version.ref = "dc-weaver" }
-dc-aviator-client-ktor = { module = "cloud.mallne.dicentra.aviator.client:ktor", version.ref = "dc-aviator" }
 dc-aviator-plugin-interception = { module = "cloud.mallne.dicentra.aviator.plugin:interception", version.ref = "dc-aviator" }
+dc-aviator-plugin-synapse = { module = "cloud.mallne.dicentra.aviator.plugin:synapse", version.ref = "dc-aviator" }
 dc-aviator-plugin-translationkeys = { module = "cloud.mallne.dicentra.aviator.plugin:translation-keys", version.ref = "dc-aviator" }
 dc-aviator-plugin-weaver = { module = "cloud.mallne.dicentra.aviator.plugin:weaver", version.ref = "dc-aviator" }
-dc-aviator-plugin-synapse = { module = "cloud.mallne.dicentra.aviator.plugin:synapse", version.ref = "dc-aviator" }
 dc-aviator-ressourceserver = { module = "cloud.mallne.dicentra.aviator:aviator-resourcee-server", version.ref = "dc-aviator" }
+dc-polyfill = { module = "cloud.mallne.dicentra:polyfill", version.ref = "dc-polyfill" }
 dc-synapse-core = { module = "cloud.mallne.dicentra.synapse:core", version.ref = "dc-synapse" }
+dc-weaver-core = { module = "cloud.mallne.dicentra.weaver:core", version.ref = "dc-weaver" }
+dc-weaver-tokenizer = { module = "cloud.mallne.dicentra.weaver:tokenizer", version.ref = "dc-weaver" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
+exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed-version" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
+exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed-version" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotations" }
+koin-ksp = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotations" }
+koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
+koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-http = { module = "io.ktor:ktor-http", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+ktor-server-auto-head-response = { module = "io.ktor:ktor-server-auto-head-response", version.ref = "ktor" }
+ktor-server-caching-headers = { module = "io.ktor:ktor-server-caching-headers", version.ref = "ktor" }
+ktor-server-compression = { module = "io.ktor:ktor-server-compression", version.ref = "ktor" }
+ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
+ktor-server-forwarded-header = { module = "io.ktor:ktor-server-forwarded-header", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation", version.ref = "ktor" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
+mcp = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp" }
+postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
 
 [plugins]
-ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "ben-manes-versions-v" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis-v" }
 kjvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kmp = { id = "org.jetbrains.kotlin.multiplatform" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.34.0" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+mavenPublish = "com.vanniktech.maven.publish:0.34.0"
+version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update-v" }

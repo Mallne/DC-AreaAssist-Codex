@@ -1,9 +1,23 @@
+import nl.littlerobots.vcu.plugin.resolver.VersionSelectors
 plugins {
     alias(libs.plugins.kjvm)
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.ktor)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.version.catalog.update)
+    alias(libs.plugins.ben.manes.versions)
+    alias(libs.plugins.dependency.analysis)
+}
+
+allprojects {
+    apply {
+        plugin("com.autonomousapps.dependency-analysis")
+    }
+}
+
+versionCatalogUpdate {
+    versionSelector(VersionSelectors.STABLE)
 }
 
 group = "cloud.mallne.dicentra.areaassist.codex"

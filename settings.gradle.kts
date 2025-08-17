@@ -40,3 +40,4 @@ if (synapseDir.exists()) {
 } else {
     println("[AREAASSIST_CODEX:synapse] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
 }
+
