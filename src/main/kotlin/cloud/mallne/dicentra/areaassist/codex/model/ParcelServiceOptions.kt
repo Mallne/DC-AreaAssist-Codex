@@ -3,7 +3,7 @@ package cloud.mallne.dicentra.areaassist.codex.model
 import cloud.mallne.dicentra.areaassist.codex.statics.SISystems
 import cloud.mallne.dicentra.areaassist.codex.statics.bundeslaender.Bundesland
 import cloud.mallne.dicentra.synapse.statics.Serialization
-import cloud.mallne.dicentra.synapse.statics.Validation
+import cloud.mallne.dicentra.polyfill.Validation
 import cloud.mallne.dicentra.aviator.core.InflatedServiceOptions
 import cloud.mallne.dicentra.aviator.core.ServiceOptions
 import cloud.mallne.dicentra.aviator.koas.info.License

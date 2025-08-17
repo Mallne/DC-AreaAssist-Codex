@@ -6,7 +6,12 @@ ktor:
     port: 8080
 
 server:
+  tls_enabled: "$TLSENABLED:true"
   hostname: "$HOSTNAME:"
+  info: "$INFO:DiCentra AreaAssist Codex"
+  description: "$DESCRIPTION:A discovery for AreaAssist."
+  base_locator: "$BASE_LOCATOR:DCAACodex"
+  discovery_exclusions: "$DISCOVERY_EXCLUSIONS:"
   cors:
     all: "$CORS_ALL:false"
     hosts: "$CORS_HOSTS:"

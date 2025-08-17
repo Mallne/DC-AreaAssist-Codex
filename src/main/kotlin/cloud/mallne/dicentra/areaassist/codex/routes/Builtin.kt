@@ -1,22 +1,20 @@
 package cloud.mallne.dicentra.areaassist.codex.routes
 
 import cloud.mallne.dicentra.areaassist.codex.statics.APIService
-import cloud.mallne.dicentra.synapse.model.DiscoveryRequest
+import cloud.mallne.dicentra.aviator.core.ServiceMethods
+import cloud.mallne.dicentra.aviator.model.ServiceLocator
+import cloud.mallne.dicentra.synapse.model.Configuration
 import cloud.mallne.dicentra.synapse.model.DiscoveryResponse
 import cloud.mallne.dicentra.synapse.model.User
-import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO.Companion.transform
-import cloud.mallne.dicentra.synapse.service.APIDBService
-import cloud.mallne.dicentra.synapse.service.CatalystGenerator
-import cloud.mallne.dicentra.synapse.statics.ServiceDefinitionGroupRule
-import cloud.mallne.dicentra.synapse.statics.ServiceDefinitionTransformationType
+import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
+import kotlin.getValue
 
 /**
  * Configures the discovery-related endpoints for the application. This method
@@ -52,9 +50,25 @@ import org.koin.ktor.ext.inject
  * verification checks.
  */
 fun Application.builtin() {
+    val builtinService = "/services/builtin"
+
+    val discoveryGenerator by inject<DiscoveryGenerator>()
+    val config by inject<Configuration>()
+
+    discoveryGenerator.memorize {
+        path(builtinService) {
+            operation(
+                method = HttpMethod.Get,
+                locator = ServiceLocator("${config.server.baseLocator}User", ServiceMethods.GATHER),
+                authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
+                summary = "Get all the Builtin Services",
+            )
+        }
+    }
+
     routing {
         authenticate(optional = false) {
-            get("/services/builtin") {
+            get(builtinService) {
                 val user: User? = call.authentication.principal()
                 verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
                 verify(user.access.admin || user.access.superAdmin) {
