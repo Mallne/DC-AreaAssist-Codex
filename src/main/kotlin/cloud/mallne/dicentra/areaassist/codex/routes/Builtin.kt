@@ -1,6 +1,6 @@
 package cloud.mallne.dicentra.areaassist.codex.routes
 
-import cloud.mallne.dicentra.areaassist.codex.statics.APIService
+import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
 import cloud.mallne.dicentra.synapse.model.Configuration
@@ -14,7 +14,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import kotlin.getValue
 
 /**
  * Configures the discovery-related endpoints for the application. This method
@@ -76,7 +75,7 @@ fun Application.builtin() {
                 }
                 val discoveryResponse = DiscoveryResponse(
                     user,
-                    APIService.apis,
+                    APIs.apis,
                 )
                 call.respond(discoveryResponse)
             }
