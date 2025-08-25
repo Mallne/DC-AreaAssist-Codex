@@ -12,18 +12,18 @@ dc-synapse = "0.0.1"
 dc-weaver = "1.0.0-SNAPSHOT"
 dc-areaassist = "1.0.0-SNAPSHOT"
 dependency-analysis-v = "2.19.0"
-exposed-version = "0.61.0"
+exposed-version = "1.0.0-beta-5"
 koin = "4.1.0"
 koin-annotations = "2.1.0"
 kotlin = "2.2.10"
-kotlinx-datetime = "0.7.1"
+kotlinx-datetime = "0.7.1-0.6.x-compat"
 ksp = "2.2.10-2.0.2"
 ktor = "3.2.3"
 logback-version = "1.5.18"
 mcp = "0.6.0"
-postgres = "42.7.7"
 serialization = "1.9.0"
 version-catalog-update-v = "1.0.0"
+postgres = "1.0.7.RELEASE"
 
 [libraries]
 dc-areaassist-shared = { module = "cloud.mallne.dicentra.areaassist:shared", version.ref = "dc-areaassist" }
@@ -41,7 +41,6 @@ dc-weaver-core = { module = "cloud.mallne.dicentra.weaver:core", version.ref = "
 dc-weaver-tokenizer = { module = "cloud.mallne.dicentra.weaver:tokenizer", version.ref = "dc-weaver" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed-version" }
 exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed-version" }
-exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed-version" }
 exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed-version" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotations" }
 koin-ksp = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotations" }
@@ -71,7 +70,7 @@ ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validat
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 mcp = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp" }
-postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+postgres = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgres" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

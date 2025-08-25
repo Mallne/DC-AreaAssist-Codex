@@ -10,7 +10,7 @@ server:
   hostname: "$HOSTNAME:"
   info: "$INFO:DiCentra AreaAssist Codex"
   description: "$DESCRIPTION:A discovery for AreaAssist."
-  base_locator: "$BASE_LOCATOR:DCAACodex"
+  base_locator: "DCAACodex"
   discovery_exclusions: "$DISCOVERY_EXCLUSIONS:"
   cors:
     all: "$CORS_ALL:false"

@@ -9,12 +9,7 @@ import io.ktor.server.routing.routing
 fun Application.storedSearch() {
     routing {
         authenticate(optional = true) {
-            get("/searches/{id}") {
-
-            }
-        }
-        authenticate {
-            post<>("/searches") {
+            get("/bundle/{id}") {
 
             }
         }

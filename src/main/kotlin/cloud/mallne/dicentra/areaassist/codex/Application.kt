@@ -1,6 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex
 
 import cloud.mallne.dicentra.areaassist.codex.routes.builtin
+import cloud.mallne.dicentra.areaassist.codex.routes.storedSearch
 import cloud.mallne.dicentra.synapse.config.configureFrameworks
 import cloud.mallne.dicentra.synapse.config.configureHTTP
 import cloud.mallne.dicentra.synapse.config.configureSecurity
@@ -20,4 +21,5 @@ fun Application.module() {
     configureHTTP()
     routes()
     builtin()
+    storedSearch()
 }

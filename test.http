@@ -12,6 +12,7 @@ GET {{server}}/services/builtin
 Authorization: Bearer {{$auth.token("keycloak")}}
 Accept: application/json
 
-###
-GET https://www.geoproxy.geoportal-th.de/geoproxy/services/adv_alkis_wfs?SERVICE=WFS&REQUEST=GetCapabilities&
-    VERSION=2.0.0
+### Ingest all Baked in Services
+GET {{server}}/services/builtin/ingest
+Authorization: Bearer {{$auth.token("keycloak")}}
+Accept: application/json
