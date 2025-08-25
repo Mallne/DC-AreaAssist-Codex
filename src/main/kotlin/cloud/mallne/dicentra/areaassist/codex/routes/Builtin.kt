@@ -1,5 +1,6 @@
 package cloud.mallne.dicentra.areaassist.codex.routes
 
+import cloud.mallne.dicentra.areaassist.codex.model.Config
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
@@ -94,7 +95,7 @@ fun Application.builtin() {
                 }
                 val discoveryResponse = DiscoveryResponse(
                     user,
-                    APIs.apis,
+                    APIs.apis + Config.getApplicationOIDCConfig(config),
                 )
                 call.respond(discoveryResponse)
             }
