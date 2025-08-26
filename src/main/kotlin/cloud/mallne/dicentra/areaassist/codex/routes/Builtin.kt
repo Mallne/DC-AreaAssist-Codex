@@ -107,7 +107,7 @@ fun Application.builtin() {
                     HttpStatusCode.Forbidden to "You need to be a Super Admin to auto-ingest the Builtin Services!"
                 }
 
-                val services = APIs.apis.map {
+                val services = (APIs.apis + Config.getApplicationOIDCConfig(config)).map {
                     APIServiceDTO(
                         serviceDefinition = it,
                         builtin = true

@@ -79,19 +79,23 @@ object Config {
                         parameters = listOf(
                             ReferenceOr.value(Parameter(
                                 name = APIs.OAuth2.CLIENT_ID,
-                                input = Parameter.Input.Query
+                                input = Parameter.Input.Query,
+                                schema = ReferenceOr.schema("StringPrimitive")
                             )),
                             ReferenceOr.value(Parameter(
                                 name = APIs.OAuth2.REDIRECT_URI,
-                                input = Parameter.Input.Query
+                                input = Parameter.Input.Query,
+                                schema = ReferenceOr.schema("StringPrimitive")
                             )),
                                     ReferenceOr.value(Parameter(
                                 name = APIs.OAuth2.STATE,
-                                input = Parameter.Input.Query
+                                input = Parameter.Input.Query,
+                                        schema = ReferenceOr.schema("StringPrimitive")
                             )),
                                     ReferenceOr.value(Parameter(
                                 name = APIs.OAuth2.RESPONSE_TYPE,
-                                input = Parameter.Input.Query
+                                input = Parameter.Input.Query,
+                                        schema = ReferenceOr.schema("StringPrimitive")
                             ))
                         ),
                     )

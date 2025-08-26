@@ -38,10 +38,9 @@ security:
   scopes: "$SECURITY_SCOPES:"
   client_id: "$SECURITY_CLIENTID:"
   client_secret: "$SECURITY_CLIENTSECRET:"
-  app:
-    issuer: "$SECURITY_ISSUER:"
-    scopes: "$SECURITY_APP_SCOPES:"
-    client_id: "$SECURITY_APP_CLIENTID:"
+  areaassist_client_id: "$SECURITY_AREAASSIST_CLIENTID:"
+  areaassist_client_name: "$SECURITY_AREAASSIST_CLIENTNAME:"
+  areaassist_account_console: "$SECURITY_AREAASSIST_ACCOUNTCONSOLE:"
   groups:
     user: "$SECURITY_GROUPS_USER:"
     admin: "$SECURITY_GROUPS_ADMIN:"
