@@ -1,6 +1,6 @@
 [versions]
 # @pin
-agp = "8.11.1"
+agp = "8.12.2"
 # @keep
 android-compileSdk = "36"
 # @keep
@@ -11,7 +11,7 @@ dc-polyfill = "1.0.0-SNAPSHOT"
 dc-synapse = "0.0.1"
 dc-weaver = "1.0.0-SNAPSHOT"
 dc-areaassist = "1.0.0-SNAPSHOT"
-dependency-analysis-v = "2.19.0"
+dependency-analysis-v = "3.0.1"
 exposed-version = "1.0.0-beta-5"
 koin = "4.1.0"
 koin-annotations = "2.1.0"
