@@ -20,7 +20,11 @@ data:
   url: "$DATA_URL"
   user: "$DATA_USER"
   password: "$DATA_PASSWORD"
-  schema: "$DATA_SCHEMA:synapse"
+  schema: "$DATA_SCHEMA:codex"
+  migrations:
+    - "src/main/resources/db/migrations"
+  auto_create_delta: "$DATA_AUTOCREATEDELTA:false"
+  migration_name: "$DATA_MIGRATIONNAME:V0__create"
 
 catalyst:
   enabled: "$CATALYST_ENABLED:true"

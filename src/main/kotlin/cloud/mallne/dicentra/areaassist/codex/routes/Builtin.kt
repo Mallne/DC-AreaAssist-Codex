@@ -9,7 +9,9 @@ import cloud.mallne.dicentra.synapse.model.DiscoveryResponse
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.synapse.service.APIDBService
+import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
+import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.ResponseObject
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
@@ -61,6 +63,8 @@ fun Application.builtin() {
     val discoveryGenerator by inject<DiscoveryGenerator>()
     val config by inject<Configuration>()
     val apiService by inject<APIDBService>()
+    val scopeService by inject<ScopeService>()
+    val db by inject<DatabaseService>()
 
     val log = LoggerFactory.getLogger("Builtin")
 
@@ -89,52 +93,58 @@ fun Application.builtin() {
         authenticate(optional = false) {
             get(builtinService) {
                 val user: User? = call.authentication.principal()
-                verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
-                verify(user.access.admin || user.access.superAdmin) {
-                    HttpStatusCode.Forbidden to "You need to be at least admin to access the baked in Service Definitions!"
+                db {
+                    user?.attachScopes(scopeService)
+                    verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
+                    verify(user.access.admin || user.access.superAdmin) {
+                        HttpStatusCode.Forbidden to "You need to be at least admin to access the baked in Service Definitions!"
+                    }
+                    val discoveryResponse = DiscoveryResponse(
+                        user,
+                        APIs.apis + Config.getApplicationOIDCConfig(config),
+                    )
+                    call.respond(discoveryResponse)
                 }
-                val discoveryResponse = DiscoveryResponse(
-                    user,
-                    APIs.apis + Config.getApplicationOIDCConfig(config),
-                )
-                call.respond(discoveryResponse)
             }
 
             get(builtinServiceAutoIngest) {
                 val user: User? = call.authentication.principal()
-                verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
-                verify(user.access.superAdmin) {
-                    HttpStatusCode.Forbidden to "You need to be a Super Admin to auto-ingest the Builtin Services!"
+                db {
+                    user?.attachScopes(scopeService)
+                    verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
+                    verify(user.access.superAdmin) {
+                        HttpStatusCode.Forbidden to "You need to be a Super Admin to auto-ingest the Builtin Services!"
+                    }
+
+                    val services = (APIs.apis + Config.getApplicationOIDCConfig(config)).map {
+                        APIServiceDTO(
+                            serviceDefinition = it,
+                            builtin = true
+                        )
+                    }
+
+                    log.info("Auto-ingesting ${services.size} Builtin Services...")
+
+                    val toDelete = apiService.readBuiltin()
+                    val deleted = mutableListOf<String>()
+                    toDelete.forEach {
+                        apiService.delete(it.id)
+                        log.debug("Deleted Builtin Service: ${it.id}")
+                        deleted.add(it.id)
+                    }
+
+                    val created = mutableListOf<String>()
+                    log.info("Creating ${services.size} Builtin Services...")
+                    for (service in services) {
+                        val id = apiService.create(service)
+                        log.debug("Created Builtin Service: $id")
+                        created.add(id)
+                    }
+
+                    log.info("Auto-ingest complete!")
+
+                    call.respond(AutoIngestResponse(deleted, created))
                 }
-
-                val services = (APIs.apis + Config.getApplicationOIDCConfig(config)).map {
-                    APIServiceDTO(
-                        serviceDefinition = it,
-                        builtin = true
-                    )
-                }
-
-                log.info("Auto-ingesting ${services.size} Builtin Services...")
-
-                val toDelete = apiService.readBuiltin()
-                val deleted = mutableListOf<String>()
-                toDelete.collect {
-                    apiService.delete(it.id)
-                    log.debug("Deleted Builtin Service: ${it.id}")
-                    deleted.add(it.id)
-                }
-
-                val created = mutableListOf<String>()
-                log.info("Creating ${services.size} Builtin Services...")
-                for (service in services) {
-                    val id = apiService.create(service)
-                    log.debug("Created Builtin Service: $id")
-                    created.add(id)
-                }
-
-                log.info("Auto-ingest complete!")
-
-                call.respond(AutoIngestResponse(deleted, created))
             }
         }
     }

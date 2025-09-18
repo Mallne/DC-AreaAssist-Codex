@@ -16,3 +16,7 @@ Accept: application/json
 GET {{server}}/services/builtin/ingest
 Authorization: Bearer {{$auth.token("keycloak")}}
 Accept: application/json
+
+### GET a SSA
+GET {{server}}/bundle/some-id
+#Authorization: Bearer {{$auth.token("keycloak")}}

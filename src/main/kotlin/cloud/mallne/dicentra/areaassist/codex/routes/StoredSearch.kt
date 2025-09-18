@@ -5,6 +5,9 @@ import cloud.mallne.dicentra.areaassist.model.actions.ServersideActionHolder
 import cloud.mallne.dicentra.areaassist.model.screen.DeepLinks
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
+import cloud.mallne.dicentra.aviator.koas.extensions.ReferenceOr
+import cloud.mallne.dicentra.aviator.koas.io.Schema
+import cloud.mallne.dicentra.aviator.koas.parameters.Parameter
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -25,6 +28,18 @@ fun Application.storedSearch() {
                 authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.OPTIONAL,
                 locator = APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER),
                 summary = "Get a stored Serverside Action by ID",
+                parameter = listOf(
+                    Parameter(
+                        name = "id",
+                        input = Parameter.Input.Path,
+                        description = "The globally unique identifier for a serverside Action.",
+                        schema = ReferenceOr.value(
+                            Schema(
+                                type = Schema.Type.Basic.String
+                            )
+                        )
+                    )
+                )
             )
         }
     }
