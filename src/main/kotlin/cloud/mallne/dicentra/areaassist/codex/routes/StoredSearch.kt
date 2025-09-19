@@ -8,7 +8,10 @@ import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.koas.extensions.ReferenceOr
 import cloud.mallne.dicentra.aviator.koas.io.Schema
 import cloud.mallne.dicentra.aviator.koas.parameters.Parameter
+import cloud.mallne.dicentra.synapse.model.User
+import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
+import cloud.mallne.dicentra.synapse.service.ScopeService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -17,11 +20,14 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
 fun Application.storedSearch() {
-    val ssa = "/bundle/{id}"
+    val ssa = "/bundle"
+    val ssaId = "$ssa/{id}"
     val discoveryGenerator by inject<DiscoveryGenerator>()
+    val db by inject<DatabaseService>()
+    val scopeService by inject<ScopeService>()
 
     discoveryGenerator.memorize {
-        path(ssa) {
+        path(ssaId) {
             operation(
                 id = "ServersideActions",
                 method = HttpMethod.Get,
@@ -46,8 +52,10 @@ fun Application.storedSearch() {
 
     routing {
         authenticate(optional = true) {
-            get(ssa) {
+            get(ssaId) {
                 val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
+                val user: User? = call.authentication.principal()
+
                 call.respond(
                     ServersideActionHolder(
                         id = id,
@@ -56,6 +64,14 @@ fun Application.storedSearch() {
                         )
                     )
                 )
+            }
+        }
+        authenticate {
+            post(ssa) {
+                val user: User? = call.authentication.principal()
+                db {
+                    user?.attachScopes(scopeService)
+                }
             }
         }
     }

@@ -24,7 +24,7 @@ data:
   migrations:
     - "src/main/resources/db/migrations"
   auto_create_delta: "$DATA_AUTOCREATEDELTA:false"
-  migration_name: "$DATA_MIGRATIONNAME:V0__create"
+  migration_name: "$DATA_MIGRATIONNAME:V0__create.generated"
 
 catalyst:
   enabled: "$CATALYST_ENABLED:true"
