@@ -26,5 +26,5 @@ dependencies {
     implementation(libs.dc.areaassist.shared)
     ksp(libs.koin.ksp)
     implementation(libs.dc.synapse.core)
-    implementation(libs.postgres)
+    runtimeOnly(libs.postgres)
 }
