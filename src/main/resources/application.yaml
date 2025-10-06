@@ -22,7 +22,9 @@ data:
   password: "$DATA_PASSWORD"
   schema: "$DATA_SCHEMA:codex"
   migrations:
-    - "src/main/resources/db/migrations"
+    - "db/migration"
+  callbacks:
+    - "db/callback"
   auto_create_delta: "$DATA_AUTOCREATEDELTA:false"
   migration_name: "$DATA_MIGRATIONNAME:V0__create.generated"
 

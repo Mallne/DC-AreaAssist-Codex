@@ -28,3 +28,8 @@ dependencies {
     implementation(libs.dc.synapse.core)
     runtimeOnly(libs.postgres)
 }
+
+tasks.shadowJar {
+    mergeServiceFiles()
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
