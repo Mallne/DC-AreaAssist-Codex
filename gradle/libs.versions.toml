@@ -32,7 +32,8 @@ dc-aviator-core = { module = "cloud.mallne.dicentra.aviator:core", version.ref =
 dc-aviator-koas = { module = "cloud.mallne.dicentra.aviator:koas", version.ref = "dc-aviator" }
 dc-aviator-plugin-interception = { module = "cloud.mallne.dicentra.aviator.plugin:interception", version.ref = "dc-aviator" }
 dc-aviator-plugin-synapse = { module = "cloud.mallne.dicentra.aviator.plugin:synapse", version.ref = "dc-aviator" }
-dc-aviator-plugin-translationkeys = { module = "cloud.mallne.dicentra.aviator.plugin:translation-keys", version.ref = "dc-aviator" }
+dc-aviator-adapter-xml = { module = "cloud.mallne.dicentra.aviator.plugin.adapter:adapter-xml", version.ref = "dc-aviator" }
+dc-aviator-adapter-json = { module = "cloud.mallne.dicentra.aviator.plugin.adapter:adapter-json", version.ref = "dc-aviator" }
 dc-aviator-plugin-weaver = { module = "cloud.mallne.dicentra.aviator.plugin:weaver", version.ref = "dc-aviator" }
 dc-aviator-ressourceserver = { module = "cloud.mallne.dicentra.aviator:aviator-resourcee-server", version.ref = "dc-aviator" }
 dc-polyfill = { module = "cloud.mallne.dicentra:polyfill", version.ref = "dc-polyfill" }

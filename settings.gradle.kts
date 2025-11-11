@@ -20,7 +20,8 @@ if (aviatorDir.exists()) {
     includeBuild(aviatorDir.absolutePath) {
         dependencySubstitution {
             substitute(module("cloud.mallne.dicentra.aviator.plugin:interception")).using(project(":plugins:interception"))
-            substitute(module("cloud.mallne.dicentra.aviator.plugin:translation-keys")).using(project(":plugins:translation-keys"))
+            substitute(module("cloud.mallne.dicentra.aviator.plugin.adapter:adapter-xml")).using(project(":plugins:adapter-xml"))
+            substitute(module("cloud.mallne.dicentra.aviator.plugin.adapter:adapter-json")).using(project(":plugins:adapter-json"))
             substitute(module("cloud.mallne.dicentra.aviator.plugin:weaver")).using(project(":plugins:weaver"))
             substitute(module("cloud.mallne.dicentra.aviator.plugin:synapse")).using(project(":plugins:synapse"))
             substitute(module("cloud.mallne.dicentra.aviator.client:ktor")).using(project(":clients:ktor"))
