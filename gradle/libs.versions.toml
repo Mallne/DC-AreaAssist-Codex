@@ -1,6 +1,6 @@
 [versions]
 # @pin
-agp = "8.12.3"
+agp = "8.13.1"
 # @keep
 android-compileSdk = "36"
 # @keep
@@ -11,17 +11,17 @@ dc-aviator = "1.0.0-SNAPSHOT"
 dc-polyfill = "1.0.0-SNAPSHOT"
 dc-synapse = "0.0.1"
 dc-weaver = "1.0.0-SNAPSHOT"
-dependency-analysis-v = "3.0.4"
-exposed-version = "1.0.0-rc-1"
+dependency-analysis-v = "3.4.1"
+exposed-version = "1.0.0-rc-3"
 koin = "4.1.1"
-koin-annotations = "2.1.0"
-kotlin = "2.2.20"
+koin-annotations = "2.3.1"
+kotlin = "2.2.21"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
-ksp = "2.2.20-2.0.3"
-ktor = "3.3.0"
-logback-version = "1.5.19"
-mcp = "0.7.2"
-postgres = "1.0.7.RELEASE"
+ksp = "2.3.2"
+ktor = "3.3.2"
+logback-version = "1.5.21"
+mcp = "0.7.7"
+postgres = "1.1.1.RELEASE"
 serialization = "1.9.0"
 version-catalog-update-v = "1.0.1"
 
@@ -83,5 +83,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
-mavenPublish = "com.vanniktech.maven.publish:0.34.0"
+mavenPublish = "com.vanniktech.maven.publish:0.35.0"
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update-v" }
