@@ -1,7 +1,9 @@
 package cloud.mallne.dicentra.areaassist.codex.routes
 
 import cloud.mallne.dicentra.areaassist.codex.model.Config
+import cloud.mallne.dicentra.areaassist.codex.model.Config.autoReleaseVersion
 import cloud.mallne.dicentra.areaassist.statics.APIs
+import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
 import cloud.mallne.dicentra.synapse.model.Configuration
@@ -101,7 +103,12 @@ fun Application.builtin() {
                     }
                     val discoveryResponse = DiscoveryResponse(
                         user,
-                        APIs.apis + Config.getApplicationOIDCConfig(config),
+                        APIs.apiOverrideVersion(
+                            if (config.server.autoReleaseVersion) ParcelConstants.endpointVersion.copy(
+                                prerelease = null,
+                                buildmetadata = null
+                            ) else ParcelConstants.endpointVersion
+                        ) + Config.getApplicationOIDCConfig(config),
                     )
                     call.respond(discoveryResponse)
                 }
@@ -116,7 +123,12 @@ fun Application.builtin() {
                         HttpStatusCode.Forbidden to "You need to be a Super Admin to auto-ingest the Builtin Services!"
                     }
 
-                    val services = (APIs.apis + Config.getApplicationOIDCConfig(config)).map {
+                    val services = (APIs.apiOverrideVersion(
+                        if (config.server.autoReleaseVersion) ParcelConstants.endpointVersion.copy(
+                            prerelease = null,
+                            buildmetadata = null
+                        ) else ParcelConstants.endpointVersion
+                    ) + Config.getApplicationOIDCConfig(config)).map {
                         APIServiceDTO(
                             serviceDefinition = it,
                             builtin = true

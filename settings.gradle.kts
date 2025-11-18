@@ -25,6 +25,7 @@ if (aviatorDir.exists()) {
             substitute(module("cloud.mallne.dicentra.aviator.plugin:weaver")).using(project(":plugins:weaver"))
             substitute(module("cloud.mallne.dicentra.aviator.plugin:synapse")).using(project(":plugins:synapse"))
             substitute(module("cloud.mallne.dicentra.aviator.client:ktor")).using(project(":clients:ktor"))
+            substitute(module("cloud.mallne.dicentra.aviator.client:mock")).using(project(":clients:mock"))
             substitute(module("cloud.mallne.dicentra.aviator:koas")).using(project(":koas"))
             substitute(module("cloud.mallne.dicentra.aviator:core")).using(project(":core"))
         }

@@ -16,6 +16,7 @@ import cloud.mallne.dicentra.aviator.koas.io.Schema
 import cloud.mallne.dicentra.aviator.koas.parameters.Parameter
 import cloud.mallne.dicentra.aviator.koas.parameters.RequestBody
 import cloud.mallne.dicentra.aviator.koas.servers.Server
+import cloud.mallne.dicentra.synapse.helper.toBooleanish
 import cloud.mallne.dicentra.synapse.model.Configuration
 import io.ktor.http.*
 import io.ktor.server.config.*
@@ -29,6 +30,9 @@ object Config {
 
     val Configuration.Nested.SecurityConfiguration.areaAssistAccConsole: String
         get() = application.environment.config.tryGetString("security.areaassist_account_console") ?: ""
+
+    val Configuration.Nested.ServerConfiguration.autoReleaseVersion: Boolean
+        get() = application.environment.config.tryGetString("server.auto_release_version")?.toBooleanish() ?: true
 
     fun getApplicationOIDCConfig(
         config: Configuration,
