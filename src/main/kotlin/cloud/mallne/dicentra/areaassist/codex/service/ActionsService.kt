@@ -34,7 +34,7 @@ import kotlin.time.ExperimentalTime
  * @constructor Initializes the `ScopeService` and creates the `Scopes` table if it does not already exist.
  */
 @Single
-class ActionsService() {
+class ActionsService {
     object Actions : IdTable<String>() {
         val action = jsonb<ServersideAction>("action", Serialization())
         val scope = varchar("scope", 255).nullable()
