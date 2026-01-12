@@ -13,12 +13,18 @@ import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
 import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.verify
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.log
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authentication
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 import org.koin.ktor.ext.inject
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -42,18 +48,20 @@ fun Application.storedSearch() {
                 authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.OPTIONAL,
                 locator = APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER),
                 summary = "Get a stored Serverside Action by ID",
-                parameter = listOf(
-                    Parameter(
-                        name = "id",
-                        input = Parameter.Input.Path,
-                        description = "The globally unique identifier for a serverside Action.",
-                        schema = ReferenceOr.value(
-                            Schema(
-                                type = Schema.Type.Basic.String
-                            )
-                        )
-                    )
-                )
+                parameter =
+                    listOf(
+                        Parameter(
+                            name = "id",
+                            input = Parameter.Input.Path,
+                            description = "The globally unique identifier for a serverside Action.",
+                            schema =
+                                ReferenceOr.value(
+                                    Schema(
+                                        type = Schema.Type.Basic.String,
+                                    ),
+                                ),
+                        ),
+                    ),
             )
         }
     }
@@ -83,8 +91,8 @@ fun Application.storedSearch() {
                     call.respond(
                         ServersideActionHolder(
                             id = action.id,
-                            action = action.action
-                        )
+                            action = action.action,
+                        ),
                     )
                 }
             }
@@ -101,7 +109,6 @@ fun Application.storedSearch() {
                     log.info("Forcefully compacting Database")
                     actionService.compact()
                     call.respond("Entries have been compacted!")
-
                 }
             }
             post(ssa) {
@@ -116,11 +123,14 @@ fun Application.storedSearch() {
                         log.info("The actions expiry date is greater than the User allowed Maximum.")
                         return@db call.respond(
                             HttpStatusCode.Forbidden,
-                            "The actions expiry date is greater than the User allowed Maximum."
+                            "The actions expiry date is greater than the User allowed Maximum.",
                         )
                     }
 
-                    verify(user.access.admin || user.access.superAdmin) { HttpStatusCode.Forbidden to "You must be at least admin to create actions" }
+                    verify(user.access.admin || user.access.superAdmin) {
+                        HttpStatusCode.Forbidden to
+                                "You must be at least admin to create actions"
+                    }
                     val s = actionService.create(action)
                     call.respond(s)
                 }
@@ -146,7 +156,10 @@ fun Application.storedSearch() {
                 db {
                     user.attachScopes(scopeService)
 
-                    verify(user.access.admin || user.access.superAdmin) { HttpStatusCode.Forbidden to "To delete an action you must be at least admin" }
+                    verify(user.access.admin || user.access.superAdmin) {
+                        HttpStatusCode.Forbidden to
+                                "To delete an action you must be at least admin"
+                    }
 
                     actionService.delete(id)
                     call.respond(HttpStatusCode.OK)
