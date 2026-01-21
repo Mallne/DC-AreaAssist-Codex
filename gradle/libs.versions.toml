@@ -1,6 +1,6 @@
 [versions]
 # @pin
-agp = "8.12.3"
+agp = "9.0.0"
 # @keep
 android-compileSdk = "36"
 # @keep
@@ -20,9 +20,9 @@ kotlinx-datetime = "0.7.1-0.6.x-compat"
 ksp = "2.3.4"
 ktor = "3.3.3"
 logback-version = "1.5.25"
-mcp = "0.8.1"
+mcp = "0.8.3"
 postgres = "1.1.1.RELEASE"
-serialization = "1.9.0"
+serialization = "1.10.0"
 version-catalog-update-v = "1.0.1"
 
 [libraries]
@@ -83,5 +83,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
-mavenPublish = "com.vanniktech.maven.publish:0.35.0"
+mavenPublish = "com.vanniktech.maven.publish:0.36.0"
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update-v" }
