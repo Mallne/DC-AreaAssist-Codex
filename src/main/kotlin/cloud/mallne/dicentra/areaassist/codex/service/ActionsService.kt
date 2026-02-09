@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.CustomFunction
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.core.eq
@@ -22,7 +23,6 @@ import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.koin.core.annotation.Single
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 
 /**
@@ -40,8 +40,15 @@ class ActionsService {
         val scope = varchar("scope", 255).nullable()
         val created = datetime("created").defaultExpression(CurrentDateTime)
 
+        private val expiresColumn = datetime("expires")
+
         @OptIn(ExperimentalTime::class)
-        val expires = datetime("expires").default(Clock.System.now().plus(14.days).toLocalDateTime())
+        val expires = expiresColumn.defaultExpression(
+            CustomFunction(
+                "CURRENT_TIMESTAMP + INTERVAL '14 days'",
+                expiresColumn.columnType
+            )
+        )
         override val id: Column<EntityID<String>> = varchar("id", 36).entityId()
     }
 

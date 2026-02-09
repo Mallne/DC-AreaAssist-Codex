@@ -6,6 +6,7 @@ ktor:
     port: 8080
 
 server:
+  auto_release_version: "$AUTORELEASEVERSION:true"
   tls_enabled: "$TLSENABLED:true"
   hostname: "$HOSTNAME:"
   info: "$INFO:DiCentra AreaAssist Codex"
