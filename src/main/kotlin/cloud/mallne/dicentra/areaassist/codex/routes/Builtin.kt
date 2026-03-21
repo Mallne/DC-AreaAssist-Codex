@@ -98,7 +98,7 @@ fun Application.builtin() {
                 db {
                     user?.attachScopes(scopeService)
                     verify(user != null) { HttpStatusCode.Unauthorized to "You need to be Authenticated for this request!" }
-                    verify(user.access.admin || user.access.superAdmin) {
+                    verify(user.access.superAdmin || user.isAdmin) {
                         HttpStatusCode.Forbidden to "You need to be at least admin to access the baked in Service Definitions!"
                     }
                     val discoveryResponse = DiscoveryResponse(

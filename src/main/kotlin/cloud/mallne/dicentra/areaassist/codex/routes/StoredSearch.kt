@@ -127,7 +127,7 @@ fun Application.storedSearch() {
                         )
                     }
 
-                    verify(user.access.admin || user.access.superAdmin) {
+                    verify(user.access.superAdmin || user.isAdmin) {
                         HttpStatusCode.Forbidden to
                                 "You must be at least admin to create actions"
                     }
@@ -156,7 +156,7 @@ fun Application.storedSearch() {
                 db {
                     user.attachScopes(scopeService)
 
-                    verify(user.access.admin || user.access.superAdmin) {
+                    verify(user.access.superAdmin || user.isAdmin) {
                         HttpStatusCode.Forbidden to
                                 "To delete an action you must be at least admin"
                     }
