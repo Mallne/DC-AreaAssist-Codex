@@ -247,4 +247,101 @@ class SyncService {
         val pendingUploads: Int,
         val lastUploadTimestamp: Instant?
     )
+
+    data class UploadResult(
+        val accepted: List<String>,
+        val rejected: List<RejectedPacketRecord>
+    )
+
+    data class RejectedPacketRecord(
+        val packetId: String,
+        val reason: RejectionReason,
+        val serverVersion: Long? = null
+    )
+
+    enum class RejectionReason {
+        VERSION_CONFLICT,
+        SCOPE_MISMATCH,
+        CHECKSUM_INVALID,
+        TYPE_NOT_ALLOWED,
+        MANAGED_READ_ONLY,
+        SERVER_ERROR
+    }
+
+    suspend fun uploadPackets(
+        scope: String,
+        packets: List<SyncPacketRecord>,
+        userScopes: List<String>,
+        isAdminOfScope: Boolean
+    ): UploadResult {
+        val accepted = mutableListOf<String>()
+        val rejected = mutableListOf<RejectedPacketRecord>()
+
+        for (packet in packets) {
+            val rejection = validatePacket(scope, packet, userScopes, isAdminOfScope)
+            if (rejection != null) {
+                rejected.add(rejection)
+                continue
+            }
+
+            upsertPacket(
+                scope = scope,
+                packetId = packet.packetId,
+                packetType = packet.packetType,
+                isManaged = packet.isManaged,
+                data = packet.data,
+                checksum = packet.checksum,
+                version = packet.version,
+                createdBy = packet.createdBy
+            )
+            accepted.add(packet.packetId)
+        }
+
+        return UploadResult(accepted, rejected)
+    }
+
+    private suspend fun validatePacket(
+        scope: String,
+        packet: SyncPacketRecord,
+        userScopes: List<String>,
+        isAdminOfScope: Boolean
+    ): RejectedPacketRecord? {
+        if (packet.scope != scope) {
+            return RejectedPacketRecord(packet.packetId, RejectionReason.SCOPE_MISMATCH)
+        }
+
+        if (packet.isManaged && !isAdminOfScope) {
+            return RejectedPacketRecord(packet.packetId, RejectionReason.MANAGED_READ_ONLY)
+        }
+
+        val existingPackets = getPacketsForScope(scope).filter { it.packetId == packet.packetId }
+        if (existingPackets.isNotEmpty()) {
+            val latest = existingPackets.maxByOrNull { it.version }
+            if (latest != null && packet.version <= latest.version) {
+                return RejectedPacketRecord(packet.packetId, RejectionReason.VERSION_CONFLICT, latest.version)
+            }
+        }
+
+        return null
+    }
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun downloadPackets(
+        scope: String,
+        sinceTimestamp: Instant?,
+        includeManaged: Boolean = true
+    ): List<SyncPacketRecord> {
+        val packets = getPacketsForScope(scope)
+
+        return if (sinceTimestamp != null) {
+            packets.filter { it.updated > sinceTimestamp }
+        } else {
+            packets
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    suspend fun downloadManagedPackets(scope: String): List<SyncPacketRecord> {
+        return getManagedPacketsForScope(scope)
+    }
 }
