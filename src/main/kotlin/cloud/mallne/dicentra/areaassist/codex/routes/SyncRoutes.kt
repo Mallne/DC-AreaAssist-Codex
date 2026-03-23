@@ -1,18 +1,19 @@
 package cloud.mallne.dicentra.areaassist.codex.routes
 
 import cloud.mallne.dicentra.areaassist.codex.service.SyncService
-import cloud.mallne.dicentra.areaassist.model.sync.SyncApiContracts.SyncDownloadResponse
-import cloud.mallne.dicentra.areaassist.model.sync.SyncApiContracts.SyncUploadRequest
-import cloud.mallne.dicentra.areaassist.model.sync.SyncApiContracts.SyncUploadResponse
-import cloud.mallne.dicentra.areaassist.model.sync.SyncModels.SyncPacket
+import cloud.mallne.dicentra.areaassist.model.sync.RejectedPacket
+import cloud.mallne.dicentra.areaassist.model.sync.RejectionReason
+import cloud.mallne.dicentra.areaassist.model.sync.SyncDownloadResponse
+import cloud.mallne.dicentra.areaassist.model.sync.SyncPacket
+import cloud.mallne.dicentra.areaassist.model.sync.SyncUploadRequest
+import cloud.mallne.dicentra.areaassist.model.sync.SyncUploadResponse
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
 import cloud.mallne.dicentra.synapse.service.ScopeService
-import cloud.mallne.dicentra.synapse.service.ScopeService.Companion.ADMIN_PREFIX
-import cloud.mallne.dicentra.synapse.service.ScopeService.Companion.SCOPE_PREFIX
+import cloud.mallne.dicentra.synapse.service.ScopeService.Companion.ScopePart
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -24,6 +25,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import org.koin.ktor.ext.inject
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 fun Application.sync() {
@@ -67,7 +69,7 @@ fun Application.sync() {
                     val scopeName = extractScopeName(request.scope)
                         ?: return@db call.respond(HttpStatusCode.BadRequest, "Invalid scope format")
 
-                    val isAdminOfScope = scopeService.isAdminOf(user.id, scopeName)
+                    val canWrite = user.canWriteTo(scopeName)
 
                     val packets = request.packets.map { packet ->
                         SyncService.SyncPacketRecord(
@@ -78,10 +80,10 @@ fun Application.sync() {
                             isManaged = packet.isManaged,
                             data = jsonElementToMap(packet.data),
                             checksum = packet.checksum,
-                            version = packet.version.toLong(),
+                            version = packet.version,
                             updated = packet.updated,
                             created = packet.created,
-                            createdBy = user.id
+                            createdBy = user.username
                         )
                     }
 
@@ -89,7 +91,7 @@ fun Application.sync() {
                         scope = request.scope,
                         packets = packets,
                         userScopes = user.scopes,
-                        isAdminOfScope = isAdminOfScope
+                        canWriteToScope = canWrite
                     )
 
                     syncService.updateLastSyncTimestamp(request.scope)
@@ -98,9 +100,9 @@ fun Application.sync() {
                         SyncUploadResponse(
                             accepted = result.accepted,
                             rejected = result.rejected.map {
-                                cloud.mallne.dicentra.areaassist.model.sync.SyncApiContracts.RejectedPacket(
+                                RejectedPacket(
                                     packetId = it.packetId,
-                                    reason = cloud.mallne.dicentra.areaassist.model.sync.SyncApiContracts.RejectionReason.valueOf(
+                                    reason = RejectionReason.valueOf(
                                         it.reason.name
                                     ),
                                     serverVersion = it.serverVersion
@@ -120,17 +122,19 @@ fun Application.sync() {
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Missing scope parameter")
                 val sinceTimestampStr = call.request.queryParameters["since_timestamp"]
                 val sinceTimestamp = sinceTimestampStr?.toLongOrNull()?.let {
-                    kotlinx.datetime.Instant.fromEpochMilliseconds(it)
+                    Instant.fromEpochMilliseconds(it)
                 }
 
                 db {
                     user.attachScopes(scopeService)
 
-                    val scopeName = extractScopeName(scope)
-                    val hasAccess = scopeName != null && (
-                            user.scopes.contains(scope) ||
-                                    (scopeName != null && scopeService.isAdminOf(user.id, scopeName))
-                            )
+                    val hasAccess = when (val extracted = ScopePart.extract(scope)) {
+                        is ScopeService.Companion.ScopeName -> {
+                            user.isDirectMember(extracted.scope) || user.isAdminOf(extracted.scope) || scope == user.userScope
+                        }
+
+                        is ScopeService.Companion.ScopeSelector -> false
+                    }
 
                     verify(hasAccess) {
                         HttpStatusCode.Forbidden to "You do not have access to this scope"
@@ -153,10 +157,9 @@ fun Application.sync() {
 }
 
 private fun extractScopeName(scope: String): String? {
-    return when {
-        scope.startsWith(SCOPE_PREFIX) -> scope.removePrefix(SCOPE_PREFIX)
-        scope.startsWith(ADMIN_PREFIX) -> scope.removePrefix(ADMIN_PREFIX)
-        else -> null
+    return when (val extracted = ScopePart.extract(scope)) {
+        is ScopeService.Companion.ScopeName -> extracted.scope
+        is ScopeService.Companion.ScopeSelector -> null
     }
 }
 
@@ -175,7 +178,7 @@ private fun SyncService.SyncPacketRecord.toSyncPacket(): SyncPacket {
         isManaged = isManaged,
         data = JsonPrimitive(""),
         checksum = checksum,
-        version = version.toInt(),
+        version = version,
         updated = updated,
         created = created
     )
@@ -188,7 +191,7 @@ private fun SyncService.SyncPacketRecord.toManagedPacket(): cloud.mallne.dicentr
         packetType = cloud.mallne.dicentra.areaassist.model.sync.PacketType.valueOf(packetType),
         isEnforced = isManaged,
         data = JsonPrimitive(""),
-        version = version.toInt(),
+        version = version,
         createdAt = created,
         createdBy = createdBy
     )

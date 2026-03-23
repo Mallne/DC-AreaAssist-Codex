@@ -23,6 +23,9 @@ application {
 }
 
 dependencies {
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger.slf4j)
+    implementation(libs.koin.annotations)
     implementation(libs.dc.areaassist.shared)
     implementation(libs.dc.synapse.core)
     runtimeOnly(libs.postgres)

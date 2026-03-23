@@ -81,26 +81,34 @@ object Config {
                             ).usable()
                         ),
                         parameters = listOf(
-                            ReferenceOr.value(Parameter(
-                                name = APIs.OAuth2.CLIENT_ID,
-                                input = Parameter.Input.Query,
-                                schema = ReferenceOr.schema("StringPrimitive")
-                            )),
-                            ReferenceOr.value(Parameter(
-                                name = APIs.OAuth2.REDIRECT_URI,
-                                input = Parameter.Input.Query,
-                                schema = ReferenceOr.schema("StringPrimitive")
-                            )),
-                                    ReferenceOr.value(Parameter(
-                                name = APIs.OAuth2.STATE,
-                                input = Parameter.Input.Query,
-                                        schema = ReferenceOr.schema("StringPrimitive")
-                            )),
-                                    ReferenceOr.value(Parameter(
-                                name = APIs.OAuth2.RESPONSE_TYPE,
-                                input = Parameter.Input.Query,
-                                        schema = ReferenceOr.schema("StringPrimitive")
-                            ))
+                            ReferenceOr.value(
+                                Parameter(
+                                    name = APIs.OAuth2.CLIENT_ID,
+                                    input = Parameter.Input.Query,
+                                    schema = ReferenceOr.schema("StringPrimitive")
+                                )
+                            ),
+                            ReferenceOr.value(
+                                Parameter(
+                                    name = APIs.OAuth2.REDIRECT_URI,
+                                    input = Parameter.Input.Query,
+                                    schema = ReferenceOr.schema("StringPrimitive")
+                                )
+                            ),
+                            ReferenceOr.value(
+                                Parameter(
+                                    name = APIs.OAuth2.STATE,
+                                    input = Parameter.Input.Query,
+                                    schema = ReferenceOr.schema("StringPrimitive")
+                                )
+                            ),
+                            ReferenceOr.value(
+                                Parameter(
+                                    name = APIs.OAuth2.RESPONSE_TYPE,
+                                    input = Parameter.Input.Query,
+                                    schema = ReferenceOr.schema("StringPrimitive")
+                                )
+                            )
                         ),
                     )
                 ),
@@ -118,15 +126,17 @@ object Config {
                         requestBody = ReferenceOr.value(
                             RequestBody(
                                 content = mapOf(
-                                    ContentType.Application.FormUrlEncoded.toString() to MediaType(
-                                        schema = ReferenceOr.value(
-                                            Schema(
-                                                properties = mapOf(
-                                                    APIs.OAuth2.CODE to ReferenceOr.schema("StringPrimitive"),
-                                                    APIs.OAuth2.CLIENT_ID to ReferenceOr.schema("StringPrimitive"),
-                                                    APIs.OAuth2.REDIRECT_URI to ReferenceOr.schema("StringPrimitive"),
-                                                    APIs.OAuth2.GRANT_TYPE to ReferenceOr.schema("StringPrimitive"),
-                                                    APIs.OAuth2.REFRESH_TOKEN to ReferenceOr.schema("StringPrimitive"),
+                                    ContentType.Application.FormUrlEncoded.toString() to ReferenceOr.value(
+                                        MediaType(
+                                            schema = ReferenceOr.value(
+                                                Schema(
+                                                    properties = mapOf(
+                                                        APIs.OAuth2.CODE to ReferenceOr.schema("StringPrimitive"),
+                                                        APIs.OAuth2.CLIENT_ID to ReferenceOr.schema("StringPrimitive"),
+                                                        APIs.OAuth2.REDIRECT_URI to ReferenceOr.schema("StringPrimitive"),
+                                                        APIs.OAuth2.GRANT_TYPE to ReferenceOr.schema("StringPrimitive"),
+                                                        APIs.OAuth2.REFRESH_TOKEN to ReferenceOr.schema("StringPrimitive"),
+                                                    )
                                                 )
                                             )
                                         )

@@ -93,7 +93,7 @@ class SyncService {
                     isManaged = row[SyncPackets.isManaged],
                     data = row[SyncPackets.data],
                     checksum = row[SyncPackets.checksum],
-                    version = row[SyncPackets.version],
+                    version = row[SyncPackets.version].toInt(),
                     updated = row[SyncPackets.updated].toInstant(),
                     created = row[SyncPackets.created].toInstant(),
                     createdBy = row[SyncPackets.createdBy]
@@ -114,7 +114,7 @@ class SyncService {
                     isManaged = row[SyncPackets.isManaged],
                     data = row[SyncPackets.data],
                     checksum = row[SyncPackets.checksum],
-                    version = row[SyncPackets.version],
+                    version = row[SyncPackets.version].toInt(),
                     updated = row[SyncPackets.updated].toInstant(),
                     created = row[SyncPackets.created].toInstant(),
                     createdBy = row[SyncPackets.createdBy]
@@ -131,7 +131,7 @@ class SyncService {
                     scope = row[SyncMetadata.id].value,
                     lastSyncTimestamp = row[SyncMetadata.lastSyncTimestamp]?.toInstant(),
                     syncEnabled = row[SyncMetadata.syncEnabled],
-                    enabledPacketTypes = row[SyncMetadata.enabledPacketTypes] ?: emptyList()
+                    enabledPacketTypes = row[SyncMetadata.enabledPacketTypes]
                 )
             }.singleOrNull()
     }
@@ -227,7 +227,7 @@ class SyncService {
         val isManaged: Boolean,
         val data: Map<String, Any>,
         val checksum: String,
-        val version: Long,
+        val version: Int,
         val updated: Instant,
         val created: Instant,
         val createdBy: String
@@ -256,7 +256,7 @@ class SyncService {
     data class RejectedPacketRecord(
         val packetId: String,
         val reason: RejectionReason,
-        val serverVersion: Long? = null
+        val serverVersion: Int? = null
     )
 
     enum class RejectionReason {
@@ -272,13 +272,13 @@ class SyncService {
         scope: String,
         packets: List<SyncPacketRecord>,
         userScopes: List<String>,
-        isAdminOfScope: Boolean
+        canWriteToScope: Boolean
     ): UploadResult {
         val accepted = mutableListOf<String>()
         val rejected = mutableListOf<RejectedPacketRecord>()
 
         for (packet in packets) {
-            val rejection = validatePacket(scope, packet, userScopes, isAdminOfScope)
+            val rejection = validatePacket(scope, packet, userScopes, canWriteToScope)
             if (rejection != null) {
                 rejected.add(rejection)
                 continue
@@ -291,7 +291,7 @@ class SyncService {
                 isManaged = packet.isManaged,
                 data = packet.data,
                 checksum = packet.checksum,
-                version = packet.version,
+                version = packet.version.toLong(),
                 createdBy = packet.createdBy
             )
             accepted.add(packet.packetId)
@@ -304,13 +304,13 @@ class SyncService {
         scope: String,
         packet: SyncPacketRecord,
         userScopes: List<String>,
-        isAdminOfScope: Boolean
+        canWriteToScope: Boolean
     ): RejectedPacketRecord? {
         if (packet.scope != scope) {
             return RejectedPacketRecord(packet.packetId, RejectionReason.SCOPE_MISMATCH)
         }
 
-        if (packet.isManaged && !isAdminOfScope) {
+        if (packet.isManaged && !canWriteToScope) {
             return RejectedPacketRecord(packet.packetId, RejectionReason.MANAGED_READ_ONLY)
         }
 

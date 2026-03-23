@@ -13,18 +13,12 @@ import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
 import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.verify
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.Application
-import io.ktor.server.application.log
-import io.ktor.server.auth.authenticate
-import io.ktor.server.auth.authentication
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.delete
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -127,9 +121,10 @@ fun Application.storedSearch() {
                         )
                     }
 
-                    verify(user.access.superAdmin || user.isAdmin) {
+                    val actionScope = action.scope
+                    verify(user.access.superAdmin || actionScope == null || user.isAdminOf(actionScope)) {
                         HttpStatusCode.Forbidden to
-                                "You must be at least admin to create actions"
+                                "You must be at least admin to create actions in this scope"
                     }
                     val s = actionService.create(action)
                     call.respond(s)
@@ -156,9 +151,13 @@ fun Application.storedSearch() {
                 db {
                     user.attachScopes(scopeService)
 
-                    verify(user.access.superAdmin || user.isAdmin) {
+                    val existingAction = actionService.read(id)
+                        ?: return@db call.respond(HttpStatusCode.NotFound)
+
+                    val actionScope = existingAction.scope
+                    verify(user.access.superAdmin || actionScope == null || user.isAdminOf(actionScope)) {
                         HttpStatusCode.Forbidden to
-                                "To delete an action you must be at least admin"
+                                "To delete an action you must be at least admin in this scope"
                     }
 
                     actionService.delete(id)
