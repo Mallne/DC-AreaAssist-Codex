@@ -7,8 +7,9 @@ import cloud.mallne.dicentra.areaassist.model.sync.SyncDownloadResponse
 import cloud.mallne.dicentra.areaassist.model.sync.SyncPacket
 import cloud.mallne.dicentra.areaassist.model.sync.SyncUploadRequest
 import cloud.mallne.dicentra.areaassist.model.sync.SyncUploadResponse
-import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
+import cloud.mallne.dicentra.aviator.model.ServiceLocator
+import cloud.mallne.dicentra.synapse.model.Configuration
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
@@ -31,6 +32,7 @@ import kotlin.time.Instant
 fun Application.sync() {
     val syncPath = "/sync"
     val discoveryGenerator by inject<DiscoveryGenerator>()
+    val config by inject<Configuration>()
     val db by inject<DatabaseService>()
     val scopeService by inject<ScopeService>()
     val syncService by inject<SyncService>()
@@ -40,16 +42,14 @@ fun Application.sync() {
             operation(
                 id = "SyncUpload",
                 method = HttpMethod.Post,
-                locator = APIs.Services.SYNC_SERVICE.locator(ServiceMethods.UPSERT),
+                locator = ServiceLocator("${config.server.baseLocator}Sync", ServiceMethods.UPSERT),
                 authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
                 summary = "Upload sync packets to Codex server",
             )
-        }
-        path(syncPath) {
             operation(
                 id = "SyncDownload",
                 method = HttpMethod.Get,
-                locator = APIs.Services.SYNC_SERVICE.locator(ServiceMethods.GATHER),
+                locator = ServiceLocator("${config.server.baseLocator}Sync", ServiceMethods.GATHER),
                 authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
                 summary = "Download sync packets from Codex server",
             )
