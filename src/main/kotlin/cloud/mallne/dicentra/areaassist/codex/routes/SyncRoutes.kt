@@ -7,14 +7,14 @@ import cloud.mallne.dicentra.areaassist.model.sync.SyncDownloadResponse
 import cloud.mallne.dicentra.areaassist.model.sync.SyncPacket
 import cloud.mallne.dicentra.areaassist.model.sync.SyncUploadRequest
 import cloud.mallne.dicentra.areaassist.model.sync.SyncUploadResponse
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
 import cloud.mallne.dicentra.synapse.model.Configuration
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.DatabaseService
-import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
+import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator.Companion.bearer
 import cloud.mallne.dicentra.synapse.service.ScopeService
-import cloud.mallne.dicentra.synapse.service.ScopeService.Companion.ScopePart
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -22,40 +22,21 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.openapi.*
+import io.ktor.utils.io.*
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import org.koin.ktor.ext.inject
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalKtorApi::class)
 fun Application.sync() {
     val syncPath = "/sync"
-    val discoveryGenerator by inject<DiscoveryGenerator>()
     val config by inject<Configuration>()
     val db by inject<DatabaseService>()
     val scopeService by inject<ScopeService>()
     val syncService by inject<SyncService>()
-
-    discoveryGenerator.memorize {
-        path(syncPath) {
-            operation(
-                id = "SyncUpload",
-                method = HttpMethod.Post,
-                locator = ServiceLocator("${config.server.baseLocator}Sync", ServiceMethods.UPSERT),
-                authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
-                summary = "Upload sync packets to Codex server",
-            )
-            operation(
-                id = "SyncDownload",
-                method = HttpMethod.Get,
-                locator = ServiceLocator("${config.server.baseLocator}Sync", ServiceMethods.GATHER),
-                authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
-                summary = "Download sync packets from Codex server",
-            )
-        }
-    }
-
     routing {
         authenticate {
             post(syncPath) {
@@ -66,8 +47,7 @@ fun Application.sync() {
                     user.attachScopes(scopeService)
                     val request = call.receive<SyncUploadRequest>()
 
-                    val scopeName = extractScopeName(request.scope)
-                        ?: return@db call.respond(HttpStatusCode.BadRequest, "Invalid scope format")
+                    val scopeName = request.scope
 
                     val canWrite = user.canWriteTo(scopeName)
 
@@ -90,7 +70,6 @@ fun Application.sync() {
                     val result = syncService.uploadPackets(
                         scope = request.scope,
                         packets = packets,
-                        userScopes = user.scopes,
                         canWriteToScope = canWrite
                     )
 
@@ -112,6 +91,14 @@ fun Application.sync() {
                         )
                     )
                 }
+            }.describe {
+                `x-dicentra-aviator-serviceDelegateCall` =
+                    ServiceLocator("${config.server.baseLocator}Sync", ServiceMethods.UPSERT)
+                summary = "Upload sync packets to Codex server"
+                operationId = "SyncUpload"
+                security {
+                    bearer()
+                }
             }
 
             get(syncPath) {
@@ -128,13 +115,7 @@ fun Application.sync() {
                 db {
                     user.attachScopes(scopeService)
 
-                    val hasAccess = when (val extracted = ScopePart.extract(scope)) {
-                        is ScopeService.Companion.ScopeName -> {
-                            user.isDirectMember(extracted.scope) || user.isAdminOf(extracted.scope) || scope == user.userScope
-                        }
-
-                        is ScopeService.Companion.ScopeSelector -> false
-                    }
+                    val hasAccess = user.isDirectMember(scope)
 
                     verify(hasAccess) {
                         HttpStatusCode.Forbidden to "You do not have access to this scope"
@@ -151,15 +132,16 @@ fun Application.sync() {
                         )
                     )
                 }
+            }.describe {
+                `x-dicentra-aviator-serviceDelegateCall` =
+                    ServiceLocator("${config.server.baseLocator}Sync", ServiceMethods.GATHER)
+                summary = "Download sync packets from Codex server"
+                operationId = "SyncDownload"
+                security {
+                    bearer()
+                }
             }
         }
-    }
-}
-
-private fun extractScopeName(scope: String): String? {
-    return when (val extracted = ScopePart.extract(scope)) {
-        is ScopeService.Companion.ScopeName -> extracted.scope
-        is ScopeService.Companion.ScopeSelector -> null
     }
 }
 

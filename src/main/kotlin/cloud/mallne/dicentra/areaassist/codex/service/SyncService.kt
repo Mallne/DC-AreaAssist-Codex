@@ -271,14 +271,13 @@ class SyncService {
     suspend fun uploadPackets(
         scope: String,
         packets: List<SyncPacketRecord>,
-        userScopes: List<String>,
         canWriteToScope: Boolean
     ): UploadResult {
         val accepted = mutableListOf<String>()
         val rejected = mutableListOf<RejectedPacketRecord>()
 
         for (packet in packets) {
-            val rejection = validatePacket(scope, packet, userScopes, canWriteToScope)
+            val rejection = validatePacket(scope, packet, canWriteToScope)
             if (rejection != null) {
                 rejected.add(rejection)
                 continue
@@ -303,7 +302,6 @@ class SyncService {
     private suspend fun validatePacket(
         scope: String,
         packet: SyncPacketRecord,
-        userScopes: List<String>,
         canWriteToScope: Boolean
     ): RejectedPacketRecord? {
         if (packet.scope != scope) {

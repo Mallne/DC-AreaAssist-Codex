@@ -2,23 +2,15 @@ package cloud.mallne.dicentra.areaassist.codex.model
 
 import cloud.mallne.dicentra.areaassist.model.AuthServiceOptions
 import cloud.mallne.dicentra.areaassist.statics.APIs
-import cloud.mallne.dicentra.areaassist.statics.Serialization
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator`
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceOptions`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
-import cloud.mallne.dicentra.aviator.koas.Components
-import cloud.mallne.dicentra.aviator.koas.OpenAPI
-import cloud.mallne.dicentra.aviator.koas.Operation
-import cloud.mallne.dicentra.aviator.koas.PathItem
-import cloud.mallne.dicentra.aviator.koas.extensions.ReferenceOr
-import cloud.mallne.dicentra.aviator.koas.info.Info
-import cloud.mallne.dicentra.aviator.koas.io.MediaType
-import cloud.mallne.dicentra.aviator.koas.io.Schema
-import cloud.mallne.dicentra.aviator.koas.parameters.Parameter
-import cloud.mallne.dicentra.aviator.koas.parameters.RequestBody
-import cloud.mallne.dicentra.aviator.koas.servers.Server
 import cloud.mallne.dicentra.synapse.helper.toBooleanish
 import cloud.mallne.dicentra.synapse.model.Configuration
 import io.ktor.http.*
+import io.ktor.openapi.*
 import io.ktor.server.config.*
 
 object Config {
@@ -36,100 +28,82 @@ object Config {
 
     fun getApplicationOIDCConfig(
         config: Configuration,
-    ): OpenAPI {
+    ): OpenApiDoc {
         val issuer = config.security.oidcConfig.issuer
         val authorizationEndpoint = config.security.oidcConfig.authorizationEndpoint.replace(issuer, "")
         val tokenEndpoint = config.security.oidcConfig.tokenEndpoint.replace(issuer, "")
         val accountConsole = config.security.areaAssistAccConsole.replace(issuer, "")
-        return OpenAPI(
-            extensions = mapOf(
-                AviatorExtensionSpec.Version.key to Serialization().parseToJsonElement(
-                    AviatorExtensionSpec.SpecVersion
-                )
-            ),
-            servers = listOf(
-                Server(issuer)
-            ),
-            info = Info(
+        return OpenApiDoc.build {
+            `x-dicentra-aviator` = AviatorExtensionSpec.SpecVersion
+            servers {
+                server(issuer)
+            }
+            info = OpenApiInfo(
                 title = config.security.areaAssistClientName,
                 description = "The OAuth2/OIDC Server used for Authentication",
                 version = AviatorExtensionSpec.SpecVersion
-            ),
+            )
+            components = Components(
+                schemas = mapOf(
+                    "StringPrimitive" to JsonSchema(type = JsonType.STRING)
+                )
+            )
+        }.copy(
             paths = mapOf(
-                accountConsole to PathItem(
-                    get = Operation(
-                        operationId = "AuthenticationAccountConsole",
-                        extensions = mapOf(
-                            AviatorExtensionSpec.ServiceLocator.O.key to APIs.Services.AUTH_ACCOUNT.locator(
-                                ServiceMethods.GATHER
-                            ).usable(),
-                            AviatorExtensionSpec.ServiceOptions.O.key to AuthServiceOptions(
+                accountConsole to ReferenceOr.value(
+                    PathItem(
+                    get = Operation.build {
+                        operationId = "AuthenticationAccountConsole"
+                        `x-dicentra-aviator-serviceDelegateCall` = APIs.Services.AUTH_ACCOUNT.locator(
+                            ServiceMethods.GATHER
+                        )
+                        `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
+                            clientId = config.security.areaAssistClientId
+                        ).usable()
+                    }
+                )),
+                authorizationEndpoint to ReferenceOr.value(
+                    PathItem(
+                    get = Operation.build {
+                        operationId = "AuthenticationAuthorizationEndpoint"
+                        `x-dicentra-aviator-serviceDelegateCall` = APIs.Services.AUTH_AUTHORIZATION.locator(
+                            ServiceMethods.GATHER
+                        )
+                        `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
+                            clientId = config.security.areaAssistClientId
+                        ).usable()
+                        parameters {
+                            query(APIs.OAuth2.CLIENT_ID) {
+                                schema = JsonSchema(type = JsonType.STRING)
+                            }
+                            query(APIs.OAuth2.REDIRECT_URI) {
+                                schema = JsonSchema(type = JsonType.STRING)
+                            }
+                            query(APIs.OAuth2.STATE) {
+                                schema = JsonSchema(type = JsonType.STRING)
+                            }
+                            query(APIs.OAuth2.RESPONSE_TYPE) {
+                                schema = JsonSchema(type = JsonType.STRING)
+                            }
+                        }
+                    }
+                )),
+                tokenEndpoint to ReferenceOr.value(
+                    PathItem(
+                        post = Operation.build {
+                            operationId = "AuthenticationTokenEndpoint"
+                            `x-dicentra-aviator-serviceDelegateCall` =
+                                APIs.Services.AUTH_TOKEN.locator(ServiceMethods.GATHER)
+                            `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
                                 clientId = config.security.areaAssistClientId
                             ).usable()
-                        ),
-                    )
-                ),
-                authorizationEndpoint to PathItem(
-                    get = Operation(
-                        operationId = "AuthenticationAuthorizationEndpoint",
-                        extensions = mapOf(
-                            AviatorExtensionSpec.ServiceLocator.O.key to APIs.Services.AUTH_AUTHORIZATION.locator(
-                                ServiceMethods.GATHER
-                            ).usable(),
-                            AviatorExtensionSpec.ServiceOptions.O.key to AuthServiceOptions(
-                                clientId = config.security.areaAssistClientId
-                            ).usable()
-                        ),
-                        parameters = listOf(
-                            ReferenceOr.value(
-                                Parameter(
-                                    name = APIs.OAuth2.CLIENT_ID,
-                                    input = Parameter.Input.Query,
-                                    schema = ReferenceOr.schema("StringPrimitive")
-                                )
-                            ),
-                            ReferenceOr.value(
-                                Parameter(
-                                    name = APIs.OAuth2.REDIRECT_URI,
-                                    input = Parameter.Input.Query,
-                                    schema = ReferenceOr.schema("StringPrimitive")
-                                )
-                            ),
-                            ReferenceOr.value(
-                                Parameter(
-                                    name = APIs.OAuth2.STATE,
-                                    input = Parameter.Input.Query,
-                                    schema = ReferenceOr.schema("StringPrimitive")
-                                )
-                            ),
-                            ReferenceOr.value(
-                                Parameter(
-                                    name = APIs.OAuth2.RESPONSE_TYPE,
-                                    input = Parameter.Input.Query,
-                                    schema = ReferenceOr.schema("StringPrimitive")
-                                )
-                            )
-                        ),
-                    )
-                ),
-                tokenEndpoint to PathItem(
-                    post = Operation(
-                        operationId = "AuthenticationTokenEndpoint",
-                        extensions = mapOf(
-                            AviatorExtensionSpec.ServiceLocator.O.key to APIs.Services.AUTH_TOKEN.locator(
-                                ServiceMethods.GATHER
-                            ).usable(),
-                            AviatorExtensionSpec.ServiceOptions.O.key to AuthServiceOptions(
-                                clientId = config.security.areaAssistClientId
-                            ).usable()
-                        ),
-                        requestBody = ReferenceOr.value(
-                            RequestBody(
-                                content = mapOf(
-                                    ContentType.Application.FormUrlEncoded.toString() to ReferenceOr.value(
-                                        MediaType(
+                        }.copy(
+                            requestBody = ReferenceOr.value(
+                                RequestBody(
+                                    content = mapOf(
+                                        ContentType.Application.FormUrlEncoded to MediaType(
                                             schema = ReferenceOr.value(
-                                                Schema(
+                                                JsonSchema(
                                                     properties = mapOf(
                                                         APIs.OAuth2.CODE to ReferenceOr.schema("StringPrimitive"),
                                                         APIs.OAuth2.CLIENT_ID to ReferenceOr.schema("StringPrimitive"),
@@ -147,11 +121,6 @@ object Config {
                     )
                 ),
             ),
-            components = Components(
-                schemas = mapOf(
-                    "StringPrimitive" to ReferenceOr.value(Schema(type = Schema.Type.Basic.String)),
-                )
-            )
         )
     }
 }

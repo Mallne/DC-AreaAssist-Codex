@@ -4,13 +4,11 @@ import cloud.mallne.dicentra.areaassist.codex.model.ActionDTO
 import cloud.mallne.dicentra.areaassist.codex.service.ActionsService
 import cloud.mallne.dicentra.areaassist.model.actions.ServersideActionHolder
 import cloud.mallne.dicentra.areaassist.statics.APIs
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
-import cloud.mallne.dicentra.aviator.koas.extensions.ReferenceOr
-import cloud.mallne.dicentra.aviator.koas.io.Schema
-import cloud.mallne.dicentra.aviator.koas.parameters.Parameter
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.DatabaseService
-import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
+import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator.Companion.bearer
 import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
@@ -19,50 +17,22 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.openapi.*
+import io.ktor.utils.io.*
 import org.koin.ktor.ext.inject
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalKtorApi::class)
 fun Application.storedSearch() {
-    val ssa = "/bundle"
-    val ssaClean = "/bundle/admin/clean"
-    val ssaId = "$ssa/{id}"
-    val discoveryGenerator by inject<DiscoveryGenerator>()
     val db by inject<DatabaseService>()
     val scopeService by inject<ScopeService>()
     val actionService by inject<ActionsService>()
 
-    discoveryGenerator.memorize {
-        path(ssaId) {
-            operation(
-                id = "ServersideActions",
-                method = HttpMethod.Get,
-                authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.OPTIONAL,
-                locator = APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER),
-                summary = "Get a stored Serverside Action by ID",
-                parameter =
-                    listOf(
-                        Parameter(
-                            name = "id",
-                            input = Parameter.Input.Path,
-                            description = "The globally unique identifier for a serverside Action.",
-                            schema =
-                                ReferenceOr.value(
-                                    Schema(
-                                        type = Schema.Type.Basic.String,
-                                    ),
-                                ),
-                        ),
-                    ),
-            )
-        }
-    }
-
     routing {
         authenticate(optional = true) {
-            get(ssaId) {
+            get("/bundle/{id}") {
                 val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.BadRequest)
 
                 db {
@@ -90,9 +60,18 @@ fun Application.storedSearch() {
                     )
                 }
             }
+        }.describe {
+            `x-dicentra-aviator-serviceDelegateCall` =
+                APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER)
+            summary = "Get a stored Serverside Action by ID"
+            operationId = "ServersideActions"
+            security {
+                optional()
+                bearer()
+            }
         }
         authenticate {
-            get(ssaClean) {
+            get("/bundle/admin/clean") {
                 val user: User =
                     call.authentication.principal() ?: return@get call.respond(HttpStatusCode.Unauthorized)
                 db {
@@ -104,8 +83,16 @@ fun Application.storedSearch() {
                     actionService.compact()
                     call.respond("Entries have been compacted!")
                 }
+            }.describe {
+                `x-dicentra-aviator-serviceDelegateCall` =
+                    APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER)
+                summary = "Get a stored Serverside Action by ID"
+                operationId = "ServersideActions"
+                security {
+                    bearer()
+                }
             }
-            post(ssa) {
+            post("/bundle") {
                 val user: User =
                     call.authentication.principal() ?: return@post call.respond(HttpStatusCode.Unauthorized)
                 db {
@@ -122,16 +109,22 @@ fun Application.storedSearch() {
                     }
 
                     val actionScope = action.scope
-                    verify(user.access.superAdmin || actionScope == null || user.isAdminOf(actionScope)) {
+                    verify(user.access.superAdmin || actionScope == null || user.canWriteTo(actionScope)) {
                         HttpStatusCode.Forbidden to
                                 "You must be at least admin to create actions in this scope"
                     }
                     val s = actionService.create(action)
                     call.respond(s)
                 }
+            }.describe {
+                summary = "Create a stored Serverside Action"
+                operationId = "CreateServersideAction"
+                security {
+                    bearer()
+                }
             }
 
-            get(ssa) {
+            get("/bundle") {
                 val user: User =
                     call.authentication.principal() ?: return@get call.respond(HttpStatusCode.Unauthorized)
 
@@ -142,9 +135,15 @@ fun Application.storedSearch() {
                     val s = actionService.readAll()
                     call.respond(s)
                 }
+            }.describe {
+                summary = "Display all Stored Serverside Actions - Superadmin management"
+                operationId = "AllServersideActions"
+                security {
+                    bearer()
+                }
             }
 
-            delete(ssaId) {
+            delete("/bundle/{id}") {
                 val user: User =
                     call.authentication.principal() ?: return@delete call.respond(HttpStatusCode.Unauthorized)
                 val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
@@ -155,13 +154,19 @@ fun Application.storedSearch() {
                         ?: return@db call.respond(HttpStatusCode.NotFound)
 
                     val actionScope = existingAction.scope
-                    verify(user.access.superAdmin || actionScope == null || user.isAdminOf(actionScope)) {
+                    verify(user.access.superAdmin || actionScope == null || user.canWriteTo(actionScope)) {
                         HttpStatusCode.Forbidden to
                                 "To delete an action you must be at least admin in this scope"
                     }
 
                     actionService.delete(id)
                     call.respond(HttpStatusCode.OK)
+                }
+            }.describe {
+                summary = "Delete a stored Serverside Action by ID"
+                operationId = "DeleteServersideAction"
+                security {
+                    bearer()
                 }
             }
         }

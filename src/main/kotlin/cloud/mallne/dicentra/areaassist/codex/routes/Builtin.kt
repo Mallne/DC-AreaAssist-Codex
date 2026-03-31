@@ -4,6 +4,7 @@ import cloud.mallne.dicentra.areaassist.codex.model.Config
 import cloud.mallne.dicentra.areaassist.codex.model.Config.autoReleaseVersion
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
 import cloud.mallne.dicentra.synapse.model.Configuration
@@ -12,7 +13,7 @@ import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.synapse.service.APIDBService
 import cloud.mallne.dicentra.synapse.service.DatabaseService
-import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator
+import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator.Companion.bearer
 import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.ResponseObject
 import cloud.mallne.dicentra.synapse.statics.verify
@@ -21,6 +22,8 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.openapi.*
+import io.ktor.utils.io.*
 import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 import org.slf4j.LoggerFactory
@@ -58,11 +61,8 @@ import org.slf4j.LoggerFactory
  * Responses include relevant HTTP status codes and error messages for failed
  * verification checks.
  */
+@OptIn(ExperimentalKtorApi::class)
 fun Application.builtin() {
-    val builtinService = "/services/builtin"
-    val builtinServiceAutoIngest = "/services/builtin/ingest"
-
-    val discoveryGenerator by inject<DiscoveryGenerator>()
     val config by inject<Configuration>()
     val apiService by inject<APIDBService>()
     val scopeService by inject<ScopeService>()
@@ -70,30 +70,9 @@ fun Application.builtin() {
 
     val log = LoggerFactory.getLogger("Builtin")
 
-    discoveryGenerator.memorize {
-        path(builtinService) {
-            operation(
-                id = "BuiltinServices",
-                method = HttpMethod.Get,
-                locator = ServiceLocator("${config.server.baseLocator}Builtin", ServiceMethods.GATHER),
-                authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
-                summary = "Get all the Builtin Services",
-            )
-        }
-        path(builtinServiceAutoIngest) {
-            operation(
-                id = "AutoIngestBuiltinServices",
-                method = HttpMethod.Get,
-                locator = ServiceLocator("${config.server.baseLocator}BuiltinIngest", ServiceMethods.GATHER),
-                authenticationStrategy = DiscoveryGenerator.Companion.AuthenticationStrategy.MANDATORY,
-                summary = "Automatically ingest and overwrite the Builtin Services as global services. Perfect for server Quickstart.",
-            )
-        }
-    }
-
     routing {
-        authenticate(optional = false) {
-            get(builtinService) {
+        authenticate {
+            get("/services/builtin") {
                 val user: User? = call.authentication.principal()
                 db {
                     user?.attachScopes(scopeService)
@@ -112,9 +91,17 @@ fun Application.builtin() {
                     )
                     call.respond(discoveryResponse)
                 }
+            }.describe {
+                `x-dicentra-aviator-serviceDelegateCall` =
+                    ServiceLocator("${config.server.baseLocator}Builtin", ServiceMethods.GATHER)
+                summary = "Get all the Builtin Services"
+                operationId = "BuiltinServices"
+                security {
+                    bearer()
+                }
             }
 
-            get(builtinServiceAutoIngest) {
+            get("/services/builtin/ingest") {
                 val user: User? = call.authentication.principal()
                 db {
                     user?.attachScopes(scopeService)
@@ -156,6 +143,15 @@ fun Application.builtin() {
                     log.info("Auto-ingest complete!")
 
                     call.respond(AutoIngestResponse(deleted, created))
+                }
+            }.describe {
+                `x-dicentra-aviator-serviceDelegateCall` =
+                    ServiceLocator("${config.server.baseLocator}BuiltinIngest", ServiceMethods.GATHER)
+                summary =
+                    "Automatically ingest and overwrite the Builtin Services as global services. Perfect for server Quickstart."
+                operationId = "AutoIngestBuiltinServices"
+                security {
+                    bearer()
                 }
             }
         }
