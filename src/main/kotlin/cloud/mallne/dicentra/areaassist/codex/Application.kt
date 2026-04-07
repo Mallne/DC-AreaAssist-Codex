@@ -1,6 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex
 
 import cloud.mallne.dicentra.areaassist.codex.di.CodexDI
+import cloud.mallne.dicentra.areaassist.codex.repository.SyncRepository.SyncEntries
 import cloud.mallne.dicentra.areaassist.codex.routes.builtin
 import cloud.mallne.dicentra.areaassist.codex.routes.health
 import cloud.mallne.dicentra.areaassist.codex.routes.storedSearch
@@ -33,7 +34,7 @@ fun Application.codexModule() {
             single { Configuration(this@codexModule) }
         }, DI, CodexDI)
     }
-    configureDatabase(APIDBService.APIServiceData, ScopeService.Scopes, ActionsService.Actions)
+    configureDatabase(APIDBService.APIServiceData, ScopeService.Scopes, ActionsService.Actions, SyncEntries)
     configureSecurity()
     configureHTTP()
     routes()

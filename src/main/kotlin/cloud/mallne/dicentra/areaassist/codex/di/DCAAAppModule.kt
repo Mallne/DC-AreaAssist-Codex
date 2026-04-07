@@ -1,5 +1,6 @@
 package cloud.mallne.dicentra.areaassist.codex.di
 
+import cloud.mallne.dicentra.areaassist.codex.repository.SyncRepository
 import cloud.mallne.dicentra.areaassist.codex.service.ActionsService
 import cloud.mallne.dicentra.areaassist.codex.service.SyncService
 import cloud.mallne.dicentra.synapse.di.AppModule
@@ -11,7 +12,11 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 @Module
-@ComponentScan("cloud.mallne.dicentra.areaassist.codex.di", "cloud.mallne.dicentra.areaassist.codex.service")
+@ComponentScan(
+    "cloud.mallne.dicentra.areaassist.codex.di",
+    "cloud.mallne.dicentra.areaassist.codex.service",
+    "cloud.mallne.dicentra.areaassist.codex.repository"
+)
 @Configuration
 class DCAAAppModule
 
@@ -20,6 +25,7 @@ class DCAAAppModule
 class DCAACodex
 
 val CodexDI = module {
+    singleOf(::SyncRepository)
     singleOf(::ActionsService)
     singleOf(::SyncService)
 }
