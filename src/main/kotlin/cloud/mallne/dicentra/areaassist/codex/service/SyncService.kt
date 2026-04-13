@@ -6,12 +6,14 @@ import cloud.mallne.dicentra.areaassist.model.sync.RejectionReason
 import cloud.mallne.dicentra.areaassist.model.sync.SyncAggregatePaging
 import cloud.mallne.dicentra.areaassist.model.sync.SyncEntryDomain
 import cloud.mallne.dicentra.areaassist.model.sync.SyncPacket
+import cloud.mallne.dicentra.areaassist.sync.AcceptedPacket
+import cloud.mallne.dicentra.areaassist.sync.SyncChecksumGenerator
+import cloud.mallne.dicentra.areaassist.sync.SyncFingerprintGenerator
 import cloud.mallne.dicentra.areaassist.sync.SyncNetwork
 import cloud.mallne.dicentra.areaassist.sync.SyncStorage
 import cloud.mallne.dicentra.areaassist.sync.UploadRejection
 import cloud.mallne.dicentra.synapse.model.RequiresTransactionContext
 import org.koin.core.annotation.Single
-import java.util.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -19,6 +21,8 @@ import kotlin.time.Instant
 @Single
 class SyncService(
     private val repository: SyncRepository,
+    private val checksumGenerator: SyncChecksumGenerator,
+    private val fingerprintGenerator: SyncFingerprintGenerator,
 ) : SyncStorage, SyncNetwork {
 
     @RequiresTransactionContext
@@ -67,33 +71,54 @@ class SyncService(
         packets: List<SyncPacket>,
     ): List<UploadRejection> {
         val rejections = mutableListOf<UploadRejection>()
+        val accepted = mutableListOf<AcceptedPacket>()
         val now = Clock.System.now()
 
         for (packet in packets) {
-            val fingerprint = UUID.randomUUID().toString()
-            val checksum = packet.hashCode().toString()
+            val checksum = checksumGenerator.compute(packet)
+            val fingerprint = fingerprintGenerator.generate(scope, checksum)
 
-            val rejection = validatePacket(scope, packet, fingerprint, checksum)
-            if (rejection != null) {
+            val existing = repository.getEntry(fingerprint)
+            if (existing != null && !existing.isStale) {
+                val rejection = RejectedPacket(
+                    packetFingerprint = existing.fingerprint,
+                    reason = RejectionReason.VERSION_CONFLICT
+                )
                 rejections.add(UploadRejection(packet, rejection))
                 continue
             }
+
+            val version = (existing?.version?.toInt() ?: 0) + 1
+            val created = existing?.created ?: now
 
             val entry = SyncEntryDomainImpl(
                 scope = scope,
                 fingerprint = fingerprint,
                 packet = packet,
                 checksum = checksum,
-                version = 1,
-                created = now,
+                version = version,
+                created = created,
                 updated = now,
                 blame = "server",
                 isManaged = false,
                 isStale = false
             )
             repository.upsertEntry(entry)
+
+            accepted.add(
+                AcceptedPacket(
+                    fingerprint = fingerprint,
+                    checksum = checksum,
+                    version = version,
+                    created = created,
+                    updated = now,
+                    blame = "server",
+                    isManaged = false
+                )
+            )
         }
 
+        lastAccepted[scope] = accepted
         return rejections
     }
 
@@ -111,22 +136,11 @@ class SyncService(
         repository.deleteEntriesByFingerprints(scope, fingerprints)
     }
 
-    private suspend fun validatePacket(
-        scope: String,
-        packet: SyncPacket,
-        fingerprint: String,
-        checksum: String,
-    ): RejectedPacket? {
-        val existing = repository.getEntry(fingerprint)
-        if (existing != null && !existing.isStale) {
-            return RejectedPacket(
-                packetFingerprint = existing.fingerprint,
-                reason = RejectionReason.VERSION_CONFLICT
-            )
-        }
-
-        return null
+    suspend fun getLastAccepted(scope: String): List<AcceptedPacket> {
+        return lastAccepted.remove(scope) ?: emptyList()
     }
+
+    private val lastAccepted = mutableMapOf<String, List<AcceptedPacket>>()
 
     private fun SyncRepository.SyncEntryRow.toSyncEntryDomain(): SyncEntryDomain {
         return SyncEntryDomainImpl(

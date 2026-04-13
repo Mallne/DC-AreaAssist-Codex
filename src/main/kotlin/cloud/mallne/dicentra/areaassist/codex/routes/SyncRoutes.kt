@@ -22,6 +22,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.routing.openapi.*
 import io.ktor.utils.io.*
 import org.koin.ktor.ext.inject
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
@@ -51,35 +52,30 @@ fun Application.sync() {
                     }
 
                     val packets = call.receive<List<SyncPacket>>()
-                    val result = syncService.uploadPackets(scope, packets)
-
-                    val accepted = syncService.getAllEntries(scope)
-                        .filter { entry ->
-                            result.none { it.packet == entry.packet }
-                        }
+                    val rejections = syncService.uploadPackets(scope, packets)
+                    val accepted = syncService.getLastAccepted(scope)
 
                     call.respond(
                         HttpStatusCode.OK,
                         mapOf(
-                            "accepted" to accepted.map { entry ->
+                            "accepted" to accepted.map { packet ->
                                 mapOf(
-                                    "fingerprint" to entry.fingerprint,
-                                    "checksum" to entry.checksum,
-                                    "version" to entry.version,
-                                    "created" to entry.created.toEpochMilliseconds(),
-                                    "updated" to entry.updated.toEpochMilliseconds(),
-                                    "blame" to entry.blame,
-                                    "isManaged" to entry.isManaged
+                                    "fingerprint" to packet.fingerprint,
+                                    "checksum" to packet.checksum,
+                                    "version" to packet.version,
+                                    "created" to packet.created.toEpochMilliseconds(),
+                                    "updated" to packet.updated.toEpochMilliseconds(),
+                                    "blame" to packet.blame,
+                                    "isManaged" to packet.isManaged
                                 )
                             },
-                            "rejected" to result.map {
+                            "rejected" to rejections.map {
                                 mapOf(
                                     "fingerprint" to it.rejection.packetFingerprint,
                                     "reason" to it.rejection.reason.name
                                 )
                             },
-                            "timestamp" to Instant.fromEpochMilliseconds(System.currentTimeMillis())
-                                .toEpochMilliseconds()
+                            "timestamp" to Clock.System.now().toEpochMilliseconds()
                         )
                     )
                 }
