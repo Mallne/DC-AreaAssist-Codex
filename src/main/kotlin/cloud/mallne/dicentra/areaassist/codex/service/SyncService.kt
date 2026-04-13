@@ -1,6 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex.service
 
 import cloud.mallne.dicentra.areaassist.codex.repository.SyncRepository
+import cloud.mallne.dicentra.areaassist.codex.sync.JvmSyncChecksumGenerator
 import cloud.mallne.dicentra.areaassist.model.sync.RejectedPacket
 import cloud.mallne.dicentra.areaassist.model.sync.RejectionReason
 import cloud.mallne.dicentra.areaassist.model.sync.SyncAggregatePaging
@@ -12,6 +13,7 @@ import cloud.mallne.dicentra.areaassist.sync.SyncFingerprintGenerator
 import cloud.mallne.dicentra.areaassist.sync.SyncNetwork
 import cloud.mallne.dicentra.areaassist.sync.SyncStorage
 import cloud.mallne.dicentra.areaassist.sync.UploadRejection
+import cloud.mallne.dicentra.areaassist.sync.UuidSyncFingerprintGenerator
 import cloud.mallne.dicentra.synapse.model.RequiresTransactionContext
 import org.koin.core.annotation.Single
 import kotlin.time.Clock
@@ -21,8 +23,8 @@ import kotlin.time.Instant
 @Single
 class SyncService(
     private val repository: SyncRepository,
-    private val checksumGenerator: SyncChecksumGenerator,
-    private val fingerprintGenerator: SyncFingerprintGenerator,
+    private val checksumGenerator: SyncChecksumGenerator = JvmSyncChecksumGenerator(),
+    private val fingerprintGenerator: SyncFingerprintGenerator = UuidSyncFingerprintGenerator,
 ) : SyncStorage, SyncNetwork {
 
     @RequiresTransactionContext
