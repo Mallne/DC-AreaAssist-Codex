@@ -8,10 +8,10 @@ import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviat
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.DatabaseService
-import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator.Companion.bearer
 import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
+import io.ktor.openapi.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -65,9 +65,25 @@ fun Application.storedSearch() {
                 APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER)
             summary = "Get a stored Serverside Action by ID"
             operationId = "ServersideActions"
-            security {
-                optional()
-                bearer()
+            responses {
+                HttpStatusCode.OK {
+                    schema = jsonSchema<ServersideActionHolder>()
+                }
+                HttpStatusCode.NotFound {
+                    description = "Action not found"
+                }
+                HttpStatusCode.Gone {
+                    ContentType.Text.Plain()
+                }
+                HttpStatusCode.Unauthorized {
+                    ContentType.Text.Plain()
+                }
+                HttpStatusCode.Forbidden {
+                    ContentType.Text.Plain()
+                }
+                HttpStatusCode.BadRequest {
+                    ContentType.Text.Plain()
+                }
             }
         }
         authenticate {
@@ -88,8 +104,16 @@ fun Application.storedSearch() {
                     APIs.Services.SERVERSIDE_ACTIONS.locator(ServiceMethods.GATHER)
                 summary = "Get a stored Serverside Action by ID"
                 operationId = "ServersideActions"
-                security {
-                    bearer()
+                responses {
+                    HttpStatusCode.OK {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Unauthorized {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Forbidden {
+                        ContentType.Text.Plain()
+                    }
                 }
             }
             post("/bundle") {
@@ -119,8 +143,24 @@ fun Application.storedSearch() {
             }.describe {
                 summary = "Create a stored Serverside Action"
                 operationId = "CreateServersideAction"
-                security {
-                    bearer()
+                requestBody {
+                    content {
+                        schema = jsonSchema<ActionDTO>()
+                    }
+                }
+                responses {
+                    HttpStatusCode.OK {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Unauthorized {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Forbidden {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.BadRequest {
+                        ContentType.Text.Plain()
+                    }
                 }
             }
 
@@ -138,8 +178,16 @@ fun Application.storedSearch() {
             }.describe {
                 summary = "Display all Stored Serverside Actions - Superadmin management"
                 operationId = "AllServersideActions"
-                security {
-                    bearer()
+                responses {
+                    HttpStatusCode.OK {
+                        schema = jsonSchema<List<ActionDTO>>()
+                    }
+                    HttpStatusCode.Unauthorized {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Forbidden {
+                        ContentType.Text.Plain()
+                    }
                 }
             }
 
@@ -165,8 +213,19 @@ fun Application.storedSearch() {
             }.describe {
                 summary = "Delete a stored Serverside Action by ID"
                 operationId = "DeleteServersideAction"
-                security {
-                    bearer()
+                responses {
+                    HttpStatusCode.OK {
+                        description = "Action deleted"
+                    }
+                    HttpStatusCode.Unauthorized {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Forbidden {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.NotFound {
+                        description = "Action not found"
+                    }
                 }
             }
         }

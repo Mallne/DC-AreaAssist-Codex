@@ -2,9 +2,8 @@ package cloud.mallne.dicentra.areaassist.codex.di
 
 import cloud.mallne.dicentra.areaassist.codex.service.SyncService
 import cloud.mallne.dicentra.areaassist.codex.sync.JvmSyncChecksumGenerator
-import cloud.mallne.dicentra.areaassist.sync.SyncChecksumGenerator
-import cloud.mallne.dicentra.areaassist.sync.SyncFingerprintGenerator
-import cloud.mallne.dicentra.areaassist.sync.UuidSyncFingerprintGenerator
+import cloud.mallne.dicentra.areaassist.model.sync.SyncChecksumGenerator
+import cloud.mallne.dicentra.areaassist.model.sync.SyncFingerprintGenerator
 import cloud.mallne.dicentra.synapse.di.AppModule
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Configuration
@@ -27,7 +26,5 @@ class DCAAAppModule
 class DCAACodex
 
 val CodexDI = module {
-    single<SyncChecksumGenerator> { JvmSyncChecksumGenerator() }
-    single<SyncFingerprintGenerator> { UuidSyncFingerprintGenerator }
     singleOf(::SyncService)
 }

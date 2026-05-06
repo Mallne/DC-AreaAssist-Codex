@@ -18,6 +18,7 @@ import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.ResponseObject
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
+import io.ktor.openapi.jsonSchema
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -81,7 +82,7 @@ fun Application.builtin() {
                         HttpStatusCode.Forbidden to "You need to be at least admin to access the baked in Service Definitions!"
                     }
                     val discoveryResponse = DiscoveryResponse(
-                        user,
+                        user.toDTO(),
                         APIs.apiOverrideVersion(
                             if (config.server.autoReleaseVersion) ParcelConstants.endpointVersion.copy(
                                 prerelease = null,
@@ -96,8 +97,16 @@ fun Application.builtin() {
                     ServiceLocator("${config.server.baseLocator}Builtin", ServiceMethods.GATHER)
                 summary = "Get all the Builtin Services"
                 operationId = "BuiltinServices"
-                security {
-                    bearer()
+                responses {
+                    HttpStatusCode.OK {
+                        schema = jsonSchema<DiscoveryResponse>()
+                    }
+                    HttpStatusCode.Unauthorized {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Forbidden {
+                        ContentType.Text.Plain()
+                    }
                 }
             }
 
@@ -150,8 +159,16 @@ fun Application.builtin() {
                 summary =
                     "Automatically ingest and overwrite the Builtin Services as global services. Perfect for server Quickstart."
                 operationId = "AutoIngestBuiltinServices"
-                security {
-                    bearer()
+                responses {
+                    HttpStatusCode.OK {
+                        schema = jsonSchema<AutoIngestResponse>()
+                    }
+                    HttpStatusCode.Unauthorized {
+                        ContentType.Text.Plain()
+                    }
+                    HttpStatusCode.Forbidden {
+                        ContentType.Text.Plain()
+                    }
                 }
             }
         }

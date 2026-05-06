@@ -1,7 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex.sync
 
+import cloud.mallne.dicentra.areaassist.model.sync.SyncChecksumGenerator
 import cloud.mallne.dicentra.areaassist.model.sync.SyncPacket
-import cloud.mallne.dicentra.areaassist.sync.SyncChecksumGenerator
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import java.security.MessageDigest

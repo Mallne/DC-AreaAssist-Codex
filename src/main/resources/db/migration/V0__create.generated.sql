@@ -30,20 +30,14 @@ CREATE TABLE IF NOT EXISTS actions
 );
 CREATE TABLE IF NOT EXISTS sync_entries
 (
+    fingerprint uuid PRIMARY KEY,
     scope       VARCHAR(255)                        NOT NULL,
-    fingerprint VARCHAR(255)                        NOT NULL,
-    packet_type VARCHAR(50)                         NOT NULL,
     packet_data JSONB                               NOT NULL,
     checksum    VARCHAR(64)                         NOT NULL,
     "version"   BIGINT    DEFAULT 1                 NOT NULL,
-    is_stale    BOOLEAN   DEFAULT FALSE             NOT NULL,
-    is_managed  BOOLEAN   DEFAULT FALSE             NOT NULL,
     created     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    blame       VARCHAR(255)                        NOT NULL,
-    id          VARCHAR(36)                         NOT NULL
+    blame       VARCHAR(255)                        NOT NULL
 );
 CREATE INDEX sync_entries_scope ON sync_entries (scope);
-ALTER TABLE sync_entries
-    ADD CONSTRAINT sync_entries_fingerprint_unique UNIQUE (fingerprint);
 CREATE SEQUENCE IF NOT EXISTS Scopes_id_seq START WITH 1 MINVALUE 1 MAXVALUE 9223372036854775807;

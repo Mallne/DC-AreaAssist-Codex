@@ -4,7 +4,7 @@ GET {{server}}
 
 ### GET all Services
 GET {{server}}/services
-#Authorization: Bearer {{$auth.token("keycloak")}}
+Authorization: bearer {{$auth.token("keycloak")}}
 Accept: application/json
 
 ### GET all Baked in Services
@@ -14,6 +14,11 @@ Accept: application/json
 
 ### Ingest all Baked in Services
 GET {{server}}/services/builtin/ingest
+Authorization: Bearer {{$auth.token("keycloak")}}
+Accept: application/json
+
+### Ingest all Baked in Services
+GET {{server}}/user
 Authorization: Bearer {{$auth.token("keycloak")}}
 Accept: application/json
 
