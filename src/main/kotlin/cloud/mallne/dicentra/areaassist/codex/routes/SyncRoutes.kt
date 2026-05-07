@@ -91,7 +91,7 @@ fun Application.sync() {
                 }
                 responses {
                     HttpStatusCode.OK {
-                        schema = jsonSchema<SyncAggregateResponse<SyncEntryFull>>()
+                        schema = jsonSchema<SyncAggregateResponse>()
                     }
                     HttpStatusCode.Unauthorized {
                         ContentType.Text.Plain()
@@ -110,7 +110,7 @@ fun Application.sync() {
 
                 db {
                     user.attachScopes(scopeService)
-                    val accepted: MutableMap<String, SyncEntryDomain> = mutableMapOf()
+                    val accepted: MutableMap<String, SyncEntryFull> = mutableMapOf()
                     val rejected: MutableMap<String, RejectionReason> = mutableMapOf()
 
                     body.forEach { (identifier, upsert) ->
@@ -177,7 +177,7 @@ fun Application.sync() {
                 }
                 responses {
                     HttpStatusCode.OK {
-                        schema = jsonSchema<SyncUploadResponse<SyncEntryFull>>()
+                        schema = jsonSchema<SyncUploadResponse>()
                     }
                     HttpStatusCode.Unauthorized {
                         ContentType.Text.Plain()
@@ -226,7 +226,7 @@ fun Application.sync() {
                 }
                 responses {
                     HttpStatusCode.OK {
-                        schema = jsonSchema<SyncDeleteResponse<SyncEntryFull>>()
+                        schema = jsonSchema<SyncDeleteResponse>()
                     }
                     HttpStatusCode.Unauthorized {
                         ContentType.Text.Plain()
