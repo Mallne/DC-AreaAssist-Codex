@@ -13,12 +13,11 @@ import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.synapse.service.APIDBService
 import cloud.mallne.dicentra.synapse.service.DatabaseService
-import cloud.mallne.dicentra.synapse.service.DiscoveryGenerator.Companion.bearer
 import cloud.mallne.dicentra.synapse.service.ScopeService
 import cloud.mallne.dicentra.synapse.statics.ResponseObject
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
-import io.ktor.openapi.jsonSchema
+import io.ktor.openapi.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
