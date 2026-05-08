@@ -25,3 +25,182 @@ Accept: application/json
 ### GET a SSA
 GET {{server}}/bundle/some-id
 #Authorization: Bearer {{$auth.token("keycloak")}}
+
+### ══════════════════════════════════════════════════════════════════════════
+### ServerSync Integration Tests
+### Protocol: attestation-based differential sync
+### Endpoints:
+###   GET    /sync/attestations  → SyncAggregateAttestation
+###   POST   /sync               → SyncAggregateResponse (download)
+###   PATCH  /sync               → SyncUploadResponse (upload upsert)
+###   DELETE /sync               → SyncDeleteResponse
+### ══════════════════════════════════════════════════════════════════════════
+###
+### NOTE: Polymorphic sealed classes use a "type" discriminator. The format
+### below assumes default kotlinx.serialization CLASS_NAME mode with "."
+### separator for nested classes. If the server returns 400, verify the
+### exact discriminator by examining the server's Json configuration in
+### synapse/core/.../statics/Serialization.kt
+
+### ────────────────────────────────────────────────────────────────────────
+### 1. GET Attestations (baseline: fingerprint→checksum mappings)
+###    Returns SyncAggregateAttestation { entries: [{fingerprint, checksum, scope}] }
+###    Empty list if no sync data for user's scopes
+### ────────────────────────────────────────────────────────────────────────
+GET {{server}}/sync/attestations
+Authorization: Bearer {{$auth.token("keycloak")}}
+Accept: application/json
+
+### ────────────────────────────────────────────────────────────────────────
+### 2. PATCH Upload (New NotePacket)
+###    Creates a new sync entry. Server assigns UUID fingerprint.
+###    Returns SyncUploadResponse { accepted: {key → SyncEntryFull}, rejected: {key → RejectionReason} }
+###    Save the returned fingerprint from accepted["upload-1"].fingerprint for subsequent tests
+### ────────────────────────────────────────────────────────────────────────
+PATCH {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "upload-1": {
+    "type": "cloud.mallne.dicentra.areaassist.model.sync.SyncUpsert.New",
+    "packet": {
+      "type": "cloud.mallne.dicentra.areaassist.model.sync.SyncPacket.NotePacket",
+      "link": {
+        "forParcel": "sync-integration-test-parcel",
+        "serviceHint": "sync-test"
+      },
+      "note": "Integration test: verify upload flow"
+    },
+    "scope": "user:mallne"
+  },
+  "upload-2": {
+    "type": "cloud.mallne.dicentra.areaassist.model.sync.SyncUpsert.New",
+    "packet": {
+      "type": "cloud.mallne.dicentra.areaassist.model.sync.SyncPacket.NotePacket",
+      "link": {
+        "forParcel": "sync-integration-test-parcel",
+        "serviceHint": "sync-test"
+      },
+      "note": "Integration test: second entry for batch download test"
+    },
+    "scope": "user:mallne"
+  }
+}
+
+### ────────────────────────────────────────────────────────────────────────
+### 3. GET Attestations (verify entries exist after upload)
+###    Should now show 2 entries matching the NotePackets above.
+###    Note the fingerprint values returned.
+### ────────────────────────────────────────────────────────────────────────
+GET {{server}}/sync/attestations
+Authorization: Bearer {{$auth.token("keycloak")}}
+Accept: application/json
+
+### ────────────────────────────────────────────────────────────────────────
+### 4. POST Download (all entries for user's scopes)
+###    Body: null → downloads ALL entries for the authenticated user's scopes.
+###    Returns SyncAggregateResponse { entries: [SyncEntryFull, ...], timestamp }
+### ────────────────────────────────────────────────────────────────────────
+POST {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+null
+
+### ────────────────────────────────────────────────────────────────────────
+### 5. POST Download (filtered by fingerprints)
+###    REPLACE the fingerprint values below with actual values from step 3.
+###    Returns only the requested entries (or empty for unknown fingerprints)
+### ────────────────────────────────────────────────────────────────────────
+POST {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  "00000000-0000-0000-0000-000000000001",
+  "00000000-0000-0000-0000-000000000002"
+]
+
+### ────────────────────────────────────────────────────────────────────────
+### 6. PATCH Upload (Update existing entry)
+###    REPLACE fingerprint with a real value from step 3.
+###    Server increments version, updates checksum, sets blame.
+###    Returns SyncUploadResponse with updated SyncEntryFull.
+### ────────────────────────────────────────────────────────────────────────
+PATCH {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "update-1": {
+    "type": "cloud.mallne.dicentra.areaassist.model.sync.SyncUpsert.Update",
+    "fingerprint": "00000000-0000-0000-0000-000000000001",
+    "packet": {
+      "type": "cloud.mallne.dicentra.areaassist.model.sync.SyncPacket.NotePacket",
+      "link": {
+        "forParcel": "sync-integration-test-parcel",
+        "serviceHint": "sync-test"
+      },
+      "note": "Integration test: verify update flow - content modified"
+    },
+    "scope": "user:mallne"
+  }
+}
+
+### ────────────────────────────────────────────────────────────────────────
+### 7. DELETE entries by fingerprint
+###    REPLACE fingerprints with real values from step 3.
+###    Returns SyncDeleteResponse { accepted: [...], rejected: [...], timestamp }
+### ────────────────────────────────────────────────────────────────────────
+DELETE {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  "00000000-0000-0000-0000-000000000001",
+  "00000000-0000-0000-0000-000000000002"
+]
+
+### ────────────────────────────────────────────────────────────────────────
+### 8. GET Attestations (verify deletion)
+###    Should now return empty list if both entries were deleted.
+### ────────────────────────────────────────────────────────────────────────
+GET {{server}}/sync/attestations
+Authorization: Bearer {{$auth.token("keycloak")}}
+Accept: application/json
+
+### ────────────────────────────────────────────────────────────────────────
+### 9. DELETE unknown fingerprints (verify error handling)
+###    Unknown fingerprints are silently accepted (no matching entry to protect).
+### ────────────────────────────────────────────────────────────────────────
+DELETE {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  "00000000-0000-0000-0000-000000009999"
+]
+
+### ────────────────────────────────────────────────────────────────────────
+### 10. POST Download with empty fingerprint list
+###     Empty list returns empty response (no entries match nothing).
+### ────────────────────────────────────────────────────────────────────────
+POST {{server}}/sync
+Authorization: Bearer {{$auth.token("keycloak")}}
+Content-Type: application/json
+Accept: application/json
+
+[]
+
+### ────────────────────────────────────────────────────────────────────────
+### 11. Unauthenticated request (verify 401)
+###     All sync endpoints require authentication.
+### ────────────────────────────────────────────────────────────────────────
+GET {{server}}/sync/attestations
