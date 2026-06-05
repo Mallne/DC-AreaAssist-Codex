@@ -1,6 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex.di
 
 import cloud.mallne.dicentra.areaassist.codex.repository.SyncRepository
+import cloud.mallne.dicentra.areaassist.codex.service.ActionsService
 import cloud.mallne.dicentra.areaassist.codex.service.SyncService
 import cloud.mallne.dicentra.synapse.di.AppModule
 import org.koin.core.annotation.ComponentScan
@@ -26,4 +27,5 @@ class DCAACodex
 val CodexDI = module {
     singleOf(::SyncRepository)
     singleOf(::SyncService)
+    singleOf(::ActionsService)
 }

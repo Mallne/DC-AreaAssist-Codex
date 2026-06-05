@@ -4,6 +4,7 @@ ktor:
       - cloud.mallne.dicentra.areaassist.codex.ApplicationKt.codexModule
   deployment:
     port: 8080
+  development: "$DEVELOPMENT:false"
 
 server:
   auto_release_version: "$AUTORELEASEVERSION:true"

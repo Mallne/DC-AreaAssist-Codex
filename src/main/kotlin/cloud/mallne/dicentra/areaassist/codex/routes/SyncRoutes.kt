@@ -6,7 +6,7 @@ import cloud.mallne.dicentra.areaassist.model.sync.*
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
-import cloud.mallne.dicentra.synapse.model.Configuration
+import cloud.mallne.dicentra.synapse.model.SynapseConfig
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.ScopeService
@@ -14,6 +14,7 @@ import io.ktor.http.*
 import io.ktor.openapi.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.config.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -28,7 +29,7 @@ import kotlin.time.Instant
 fun Application.sync() {
     val syncPath = "/sync"
     val attestationPath = "/sync/attestations"
-    val config by inject<Configuration>()
+    val config = environment.config.getAs<SynapseConfig>()
     val db by inject<DatabaseService>()
     val scopeService by inject<ScopeService>()
     val syncService by inject<SyncService>()

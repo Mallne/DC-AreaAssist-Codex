@@ -7,32 +7,73 @@ import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviat
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceOptions`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
-import cloud.mallne.dicentra.synapse.helper.toBooleanish
-import cloud.mallne.dicentra.synapse.model.Configuration
+import cloud.mallne.dicentra.synapse.model.*
+import cloud.mallne.dicentra.synapse.model.Server
+import cloud.mallne.dicentra.synapse.statics.ServiceDefinitionTransformationType
 import io.ktor.http.*
 import io.ktor.openapi.*
-import io.ktor.server.config.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+
+@Serializable
+data class CodexServer(
+    val cors: ServerCors,
+    val hostname: String = "0.0.0.0",
+    @SerialName("tls_enabled")
+    val tlsEnabled: Boolean = true,
+    val info: String = "DiCentra Synapse",
+    val description: String = "A discovery endpoint for Aviator services.",
+    @SerialName("base_locator")
+    val baseLocator: String = "synapse",
+    @SerialName("discovery_exclusions")
+    val discoveryExclusions: List<String> = listOf(),
+    @SerialName("auto_release_version")
+    val autoReleaseVersion: Boolean = true,
+)
+
+@Serializable
+data class CodexSecurity(
+    val enabled: Boolean = false,
+    val issuer: String = "",
+    val authorizationEndpoint: String = "$issuer/protocol/openid-connect/auth",
+    val tokenEndpoint: String = "$issuer/protocol/openid-connect/token",
+    val introspectionEndpoint: String = "$issuer/protocol/openid-connect/introspect",
+    val scopes: String = "",
+    @SerialName("client_id")
+    val clientId: String = "",
+    @SerialName("client_secret")
+    val clientSecret: String = "",
+    val groups: SecurityGroups,
+    @SerialName("area_assist_client_id")
+    val areaAssistClientId: String = "",
+    @SerialName("areaassist_client_name")
+    val areaAssistClientName: String = "Authentication",
+    @SerialName("areaassist_account_console")
+    val areaAssistAccountConsole: String = "",
+) {
+    @OptIn(ExperimentalEncodingApi::class)
+    fun encodedCredentials() = Base64.encode("$clientId:$clientSecret".toByteArray())
+}
+
+@Serializable
+data class CodexConfig(
+    val security: CodexSecurity,
+    val data: Database,
+    val server: CodexServer,
+    val catalyst: Catalyst,
+    val preferredTransform: ServiceDefinitionTransformationType = ServiceDefinitionTransformationType.Native
+)
 
 object Config {
-    val Configuration.Nested.SecurityConfiguration.areaAssistClientId: String
-        get() = application.environment.config.tryGetString("security.areaassist_client_id") ?: ""
-
-    val Configuration.Nested.SecurityConfiguration.areaAssistClientName: String
-        get() = application.environment.config.tryGetString("security.areaassist_client_name") ?: "Authentication"
-
-    val Configuration.Nested.SecurityConfiguration.areaAssistAccConsole: String
-        get() = application.environment.config.tryGetString("security.areaassist_account_console") ?: ""
-
-    val Configuration.Nested.ServerConfiguration.autoReleaseVersion: Boolean
-        get() = application.environment.config.tryGetString("server.auto_release_version")?.toBooleanish() ?: true
-
     fun getApplicationOIDCConfig(
-        config: Configuration,
+        config: CodexConfig,
     ): OpenApiDoc {
-        val issuer = config.security.oidcConfig.issuer
-        val authorizationEndpoint = config.security.oidcConfig.authorizationEndpoint.replace(issuer, "")
-        val tokenEndpoint = config.security.oidcConfig.tokenEndpoint.replace(issuer, "")
-        val accountConsole = config.security.areaAssistAccConsole.replace(issuer, "")
+        val issuer = config.security.issuer
+        val authorizationEndpoint = config.security.authorizationEndpoint.replace(issuer, "")
+        val tokenEndpoint = config.security.tokenEndpoint.replace(issuer, "")
+        val accountConsole = config.security.areaAssistAccountConsole.replace(issuer, "")
         return OpenApiDoc.build {
             `x-dicentra-aviator` = AviatorExtensionSpec.SpecVersion
             servers {
@@ -52,42 +93,42 @@ object Config {
             paths = mapOf(
                 accountConsole to ReferenceOr.value(
                     PathItem(
-                    get = Operation.build {
-                        operationId = "AuthenticationAccountConsole"
-                        `x-dicentra-aviator-serviceDelegateCall` = APIs.Services.AUTH_ACCOUNT.locator(
-                            ServiceMethods.GATHER
-                        )
-                        `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
-                            clientId = config.security.areaAssistClientId
-                        ).usable()
-                    }
-                )),
+                        get = Operation.build {
+                            operationId = "AuthenticationAccountConsole"
+                            `x-dicentra-aviator-serviceDelegateCall` = APIs.Services.AUTH_ACCOUNT.locator(
+                                ServiceMethods.GATHER
+                            )
+                            `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
+                                clientId = config.security.areaAssistClientId
+                            ).usable()
+                        }
+                    )),
                 authorizationEndpoint to ReferenceOr.value(
                     PathItem(
-                    get = Operation.build {
-                        operationId = "AuthenticationAuthorizationEndpoint"
-                        `x-dicentra-aviator-serviceDelegateCall` = APIs.Services.AUTH_AUTHORIZATION.locator(
-                            ServiceMethods.GATHER
-                        )
-                        `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
-                            clientId = config.security.areaAssistClientId
-                        ).usable()
-                        parameters {
-                            query(APIs.OAuth2.CLIENT_ID) {
-                                schema = JsonSchema(type = JsonType.STRING)
-                            }
-                            query(APIs.OAuth2.REDIRECT_URI) {
-                                schema = JsonSchema(type = JsonType.STRING)
-                            }
-                            query(APIs.OAuth2.STATE) {
-                                schema = JsonSchema(type = JsonType.STRING)
-                            }
-                            query(APIs.OAuth2.RESPONSE_TYPE) {
-                                schema = JsonSchema(type = JsonType.STRING)
+                        get = Operation.build {
+                            operationId = "AuthenticationAuthorizationEndpoint"
+                            `x-dicentra-aviator-serviceDelegateCall` = APIs.Services.AUTH_AUTHORIZATION.locator(
+                                ServiceMethods.GATHER
+                            )
+                            `x-dicentra-aviator-serviceOptions` = AuthServiceOptions(
+                                clientId = config.security.areaAssistClientId
+                            ).usable()
+                            parameters {
+                                query(APIs.OAuth2.CLIENT_ID) {
+                                    schema = JsonSchema(type = JsonType.STRING)
+                                }
+                                query(APIs.OAuth2.REDIRECT_URI) {
+                                    schema = JsonSchema(type = JsonType.STRING)
+                                }
+                                query(APIs.OAuth2.STATE) {
+                                    schema = JsonSchema(type = JsonType.STRING)
+                                }
+                                query(APIs.OAuth2.RESPONSE_TYPE) {
+                                    schema = JsonSchema(type = JsonType.STRING)
+                                }
                             }
                         }
-                    }
-                )),
+                    )),
                 tokenEndpoint to ReferenceOr.value(
                     PathItem(
                         post = Operation.build {

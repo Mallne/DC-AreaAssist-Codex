@@ -1,13 +1,12 @@
 package cloud.mallne.dicentra.areaassist.codex.routes
 
+import cloud.mallne.dicentra.areaassist.codex.model.CodexConfig
 import cloud.mallne.dicentra.areaassist.codex.model.Config
-import cloud.mallne.dicentra.areaassist.codex.model.Config.autoReleaseVersion
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
-import cloud.mallne.dicentra.synapse.model.Configuration
 import cloud.mallne.dicentra.synapse.model.DiscoveryResponse
 import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
@@ -20,6 +19,7 @@ import io.ktor.http.*
 import io.ktor.openapi.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.config.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.openapi.*
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory
  */
 @OptIn(ExperimentalKtorApi::class)
 fun Application.builtin() {
-    val config by inject<Configuration>()
+    val config = environment.config.getAs<CodexConfig>()
     val apiService by inject<APIDBService>()
     val scopeService by inject<ScopeService>()
     val db by inject<DatabaseService>()
