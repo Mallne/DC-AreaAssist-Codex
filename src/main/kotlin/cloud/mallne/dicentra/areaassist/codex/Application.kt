@@ -11,6 +11,7 @@ import cloud.mallne.dicentra.areaassist.codex.service.ActionsService
 import cloud.mallne.dicentra.synapse.config.configureDatabase
 import cloud.mallne.dicentra.synapse.config.configureHTTP
 import cloud.mallne.dicentra.synapse.config.configureSecurity
+import cloud.mallne.dicentra.synapse.config.configureTelemetry
 import cloud.mallne.dicentra.synapse.config.routes
 import cloud.mallne.dicentra.synapse.di.DI
 import cloud.mallne.dicentra.synapse.model.SynapseConfig
@@ -46,4 +47,5 @@ fun Application.codexModule() {
     storedSearch()
     sync()
     health()
+    configureTelemetry("codex")
 }
