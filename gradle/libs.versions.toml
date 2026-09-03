@@ -1,6 +1,6 @@
 [versions]
 # @pin
-agp = "9.1.1"
+agp = "9.4.0"
 # @keep
 android-compileSdk = "36"
 # @keep
@@ -21,12 +21,12 @@ kotlinx-datetime = "0.8.0"
 ktor = "3.5.2"
 logback-version = "1.6.3"
 mcp = "0.15.0"
-postgres = "1.1.1.RELEASE"
+postgres = "1.1.2.RELEASE"
 postgres-jdbc = "42.7.13"
 serialization = "1.11.0"
 version-catalog-update-v = "1.1.1"
 opentelemetry = "1.65.0"
-opentelemetry-instrumentation = "2.26.1-alpha"
+opentelemetry-instrumentation = "2.31.1-alpha"
 
 [libraries]
 dc-areaassist-shared = { module = "cloud.mallne.dicentra.areaassist:shared", version.ref = "dc-areaassist" }
