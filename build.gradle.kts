@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.dc.aviator.plugin.interception)
     implementation(libs.dc.aviator.plugin.weaver)
     implementation(libs.dc.aviator.plugin.synapse)
+    implementation(libs.dc.aviator.plugin.otel)
     implementation(libs.dc.polyfill)
     implementation(libs.dc.areaassist.shared)
     implementation(libs.dc.synapse.core)

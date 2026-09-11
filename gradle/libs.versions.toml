@@ -36,6 +36,7 @@ dc-aviator-client-ktor = { module = "cloud.mallne.dicentra.aviator.client:ktor",
 dc-aviator-core = { module = "cloud.mallne.dicentra.aviator:core", version.ref = "dc-aviator" }
 dc-aviator-koas = { module = "cloud.mallne.dicentra.aviator:koas", version.ref = "dc-aviator" }
 dc-aviator-plugin-interception = { module = "cloud.mallne.dicentra.aviator.plugin:interception", version.ref = "dc-aviator" }
+dc-aviator-plugin-otel = { module = "cloud.mallne.dicentra.aviator.plugin:otel", version.ref = "dc-aviator" }
 dc-aviator-plugin-synapse = { module = "cloud.mallne.dicentra.aviator.plugin:synapse", version.ref = "dc-aviator" }
 dc-aviator-plugin-weaver = { module = "cloud.mallne.dicentra.aviator.plugin:weaver", version.ref = "dc-aviator" }
 dc-polyfill = { module = "cloud.mallne.dicentra:polyfill", version.ref = "dc-polyfill" }
