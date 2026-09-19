@@ -7,14 +7,26 @@
   "packageRules": [
     {
       "description": "Group Docker Compose services",
-      "matchManagers": ["docker-compose"],
+      "matchManagers": [
+        "docker-compose"
+      ],
       "groupName": "Docker Compose services",
       "automerge": true
+    },
+    {
+      "matchPackagePrefixes": [
+        "cloud.mallne"
+      ],
+      "allowedVersions": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     }
   ],
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   }
 }
