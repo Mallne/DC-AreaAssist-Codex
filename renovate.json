@@ -14,10 +14,11 @@
       "automerge": true
     },
     {
-      "matchPackagePrefixes": [
-        "cloud.mallne"
+      "matchPackageNames": [
+        "cloud.mallne**"
       ],
-      "allowedVersions": "/^[0-9]+\\\\.[0-9]+\\\\.[0-9]+$/"
+      "allowedVersions": "/^[0-9]+\\\\.[0-9]+\\\\.[0-9]+$/",
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<build>\\d+)-build\\.(?<hash>\\w+))?$"
     }
   ],
   "labels": [
