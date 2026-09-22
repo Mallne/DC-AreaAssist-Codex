@@ -1,0 +1,67 @@
+name: Build & Release Docker Image
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: cr.mallne.cloud
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: cr.mallne.cloud/dicentra/areaassist-codex
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          secrets: |
+            nexus_username=${{ secrets.NEXUS_USERNAME }}
+            nexus_password=${{ secrets.NEXUS_PASSWORD }}
+
+      - name: Create GitHub Release
+        run: gh release create ${{ github.ref_name }} --generate-notes --title ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump version to next SNAPSHOT
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          MAJOR=$(echo "$TAG_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$TAG_VERSION" | cut -d. -f2)
+          PATCH=$(echo "$TAG_VERSION" | cut -d. -f3)
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-SNAPSHOT"
+          sed -i "s/^VERSION_NAME=.*/VERSION_NAME=${NEXT_VERSION}/" gradle.properties
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add gradle.properties
+          git commit -m "chore: bump version to ${NEXT_VERSION} [skip ci]"
+          git push origin HEAD:master

@@ -1,0 +1,10 @@
+.git
+.github
+.gradle
+.kotlin
+build
+local.properties
+.env
+.env.*
+http-client.env.json
+http-client.private.env.json
