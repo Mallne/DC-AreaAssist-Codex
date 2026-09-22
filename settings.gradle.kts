@@ -8,7 +8,9 @@ pluginManagement {
 
 rootProject.name = "Codex"
 
-val aviatorDir = file("../../aviator")
+val baseDir = settings.settingsDir
+
+val aviatorDir = file(File(baseDir, "../../aviator").canonicalPath)
 if (aviatorDir.exists()) {
     includeBuild(aviatorDir.absolutePath) {
         dependencySubstitution {
@@ -28,7 +30,7 @@ if (aviatorDir.exists()) {
     println("[AREAASSIST_CODEX:aviator] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
 }
 
-val synapseDir = file("../../synapse")
+val synapseDir = file(File(baseDir, "../../synapse").canonicalPath)
 if (synapseDir.exists()) {
     includeBuild(synapseDir.absolutePath) {
         dependencySubstitution {
@@ -39,7 +41,7 @@ if (synapseDir.exists()) {
     println("[AREAASSIST_CODEX:synapse] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
 }
 
-val sharedDir = file("../shared")
+val sharedDir = file(File(baseDir, "../shared").canonicalPath)
 if (sharedDir.exists()) {
     includeBuild(sharedDir.absolutePath) {
         dependencySubstitution {
