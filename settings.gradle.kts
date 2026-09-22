@@ -8,9 +8,6 @@ pluginManagement {
 
 rootProject.name = "Codex"
 
-val monorepoRoot = file("../../..")
-val isStandalone = !file("../../aviator/settings.gradle.kts").isFile
-
 val aviatorDir = file("../../aviator")
 if (aviatorDir.exists()) {
     includeBuild(aviatorDir.absolutePath) {
