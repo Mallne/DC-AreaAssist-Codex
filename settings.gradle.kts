@@ -5,33 +5,14 @@ pluginManagement {
         mavenCentral()
     }
 }
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-    repositories {
-        maven {
-            url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
-            credentials {
-                username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
-                password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
-            }
-            content {
-                includeGroupByRegex("cloud\\.mallne\\..*")
-            }
-        }
-        google()
-        mavenCentral()
-    }
-}
 
 rootProject.name = "Codex"
 
 val monorepoRoot = file("../../..")
 val isStandalone = !file("../../aviator/settings.gradle.kts").isFile
 
-if (isStandalone) {
-    println("[AREAASSIST_CODEX] Running in standalone mode -- monorepo includes disabled, dependencies will be resolved from Nexus")
-} else {
-    val aviatorDir = file("../../aviator")
+val aviatorDir = file("../../aviator")
+if (aviatorDir.exists()) {
     includeBuild(aviatorDir.absolutePath) {
         dependencySubstitution {
             substitute(module("cloud.mallne.dicentra.aviator.plugin:interception")).using(project(":plugins:interception"))
@@ -46,22 +27,28 @@ if (isStandalone) {
             substitute(module("cloud.mallne.dicentra.aviator:core")).using(project(":core"))
         }
     }
+} else {
+    println("[AREAASSIST_CODEX:aviator] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
+}
 
-    val synapseDir = file("../../synapse")
-    if (synapseDir.exists()) {
-        includeBuild(synapseDir.absolutePath) {
-            dependencySubstitution {
-                substitute(module("cloud.mallne.dicentra.synapse:core")).using(project(":core"))
-            }
+val synapseDir = file("../../synapse")
+if (synapseDir.exists()) {
+    includeBuild(synapseDir.absolutePath) {
+        dependencySubstitution {
+            substitute(module("cloud.mallne.dicentra.synapse:core")).using(project(":core"))
         }
     }
+} else {
+    println("[AREAASSIST_CODEX:synapse] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
+}
 
-    val sharedDir = file("../shared")
-    if (sharedDir.exists()) {
-        includeBuild(sharedDir.absolutePath) {
-            dependencySubstitution {
-                substitute(module("cloud.mallne.dicentra.areaassist:shared")).using(project(":"))
-            }
+val sharedDir = file("../shared")
+if (sharedDir.exists()) {
+    includeBuild(sharedDir.absolutePath) {
+        dependencySubstitution {
+            substitute(module("cloud.mallne.dicentra.areaassist:shared")).using(project(":"))
         }
     }
+} else {
+    println("[AREAASSIST_CODEX:shared] This Project seems to be running without the Monorepo Context, please consider using the Monorepo")
 }

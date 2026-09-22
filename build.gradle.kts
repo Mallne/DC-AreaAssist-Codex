@@ -12,6 +12,17 @@ allprojects {
     apply {
         plugin("com.autonomousapps.dependency-analysis")
     }
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://registry.mallne.cloud/repository/DiCentraArtefacts/")
+            credentials {
+                username = providers.environmentVariable("NEXUS_USERNAME").getOrElse("")
+                password = providers.environmentVariable("NEXUS_PASSWORD").getOrElse("")
+            }
+        }
+    }
 }
 
 group = "cloud.mallne.dicentra.areaassist.codex"
