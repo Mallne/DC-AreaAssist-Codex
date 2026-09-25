@@ -1,4 +1,4 @@
-FROM gradle:jdk25-alpine@sha256:279f6cae59d5a877d1767d8f12a3a74c569c46d70121e7fc465e6f8b3862e0c5 AS build
+FROM gradle:jdk25-alpine@sha256:9c6d10f0380c29b629fc4d61950da365b6ab33a70adb64b8d7ef496962df0bf5 AS build
 LABEL authors="Mallne"
 
 RUN addgroup -g 1001 -S buildgroup && adduser -u 1001 -G buildgroup -S builduser
