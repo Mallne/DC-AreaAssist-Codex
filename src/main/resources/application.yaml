@@ -40,6 +40,10 @@ catalyst:
 
 preferred_transform: "$PREFERRED_TRANSFORM:Native"
 
+telemetry:
+  endpoint: "$OTEL_EXPORTER_OTLP_ENDPOINT:"
+  service_name: "$OTEL_SERVICE_NAME:codex"
+
 security:
   enabled: "$SECURITY_ENABLED:false"
   issuer: "$SECURITY_ISSUER:"

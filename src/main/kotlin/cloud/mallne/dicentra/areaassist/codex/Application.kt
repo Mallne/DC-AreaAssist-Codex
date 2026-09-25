@@ -47,5 +47,5 @@ fun Application.codexModule() {
     storedSearch()
     sync()
     health()
-    configureTelemetry("codex")
+    configureTelemetry()
 }
