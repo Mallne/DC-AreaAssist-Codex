@@ -75,17 +75,14 @@
       "matchDatasources": [
         "maven"
       ],
-      "excludePackageNames": [
-        "cloud.mallne**"
+      "matchPackageNames": [
+        "!cloud.mallne**"
       ]
     },
     {
       "description": "Automerge patch and minor updates to external npm development dependencies after CI passes",
       "matchDatasources": [
         "npm"
-      ],
-      "excludePackageNames": [
-        "@dicentra/*"
       ],
       "matchDepTypes": [
         "devDependencies"
@@ -94,7 +91,10 @@
         "patch",
         "minor"
       ],
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": [
+        "!@dicentra/*"
+      ]
     },
     {
       "description": "Do not automerge Gradle wrapper updates",
