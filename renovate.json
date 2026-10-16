@@ -30,6 +30,88 @@
         "org.jetbrains.kotlinx:kotlinx-datetime"
       ],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(-(?<compatibility>.+))?$"
+    },
+    {
+      "minimumReleaseAge": null,
+      "description": "Allow internal DiCentra packages to bypass release age",
+      "matchPackageNames": [
+        "@dicentra/**",
+        "cloud.mallne**"
+      ]
+    },
+    {
+      "description": "Automerge internal DiCentra packages after CI passes",
+      "matchPackageNames": [
+        "@dicentra/**",
+        "cloud.mallne**"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Automerge Docker and CI pipeline updates after CI passes",
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose",
+        "github-actions",
+        "gitlabci",
+        "azure-pipelines",
+        "circleci",
+        "bitbucket-pipelines",
+        "buildkite",
+        "drone",
+        "jenkins",
+        "teamcity",
+        "woodpecker"
+      ],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "description": "Automerge patch and minor updates to external Maven dependencies after CI passes",
+      "automerge": true,
+      "matchDatasources": [
+        "maven"
+      ],
+      "excludePackageNames": [
+        "cloud.mallne**"
+      ]
+    },
+    {
+      "description": "Automerge patch and minor updates to external npm development dependencies after CI passes",
+      "matchDatasources": [
+        "npm"
+      ],
+      "excludePackageNames": [
+        "@dicentra/*"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Do not automerge Gradle wrapper updates",
+      "matchManagers": [
+        "gradle-wrapper"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Do not automerge Android Gradle Plugin updates",
+      "matchPackageNames": [
+        "com.android.tools.build:gradle",
+        "com.android.library",
+        "com.android.kotlin.multiplatform.library",
+        "com.android.application"
+      ],
+      "automerge": false
     }
   ],
   "labels": [
@@ -40,5 +122,6 @@
     "labels": [
       "security"
     ]
-  }
+  },
+  "minimumReleaseAge": "1 day"
 }
