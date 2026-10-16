@@ -108,8 +108,11 @@
       "matchPackageNames": [
         "com.android.tools.build:gradle",
         "com.android.library",
+        "com.android.library:com.android.library.gradle.plugin",
         "com.android.kotlin.multiplatform.library",
-        "com.android.application"
+        "com.android.kotlin.multiplatform.library:com.android.kotlin.multiplatform.library.gradle.plugin",
+        "com.android.application",
+        "com.android.application:com.android.application.gradle.plugin"
       ],
       "automerge": false
     }
