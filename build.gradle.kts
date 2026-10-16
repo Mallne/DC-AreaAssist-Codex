@@ -86,6 +86,9 @@ dependencies {
     implementation(libs.dc.polyfill)
     implementation(libs.dc.areaassist.shared)
     implementation(libs.dc.synapse.core)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.ktor.client.mock)
 }
 
 tasks.shadowJar {

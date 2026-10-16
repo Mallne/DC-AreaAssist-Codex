@@ -1,6 +1,7 @@
 package cloud.mallne.dicentra.areaassist.codex
 
 import cloud.mallne.dicentra.areaassist.codex.di.CodexDI
+import cloud.mallne.dicentra.areaassist.codex.di.CatalystPluginModule
 import cloud.mallne.dicentra.areaassist.codex.model.CodexConfig
 import cloud.mallne.dicentra.areaassist.codex.repository.SyncRepository.SyncEntries
 import cloud.mallne.dicentra.areaassist.codex.routes.builtin
@@ -17,18 +18,21 @@ import cloud.mallne.dicentra.synapse.di.DI
 import cloud.mallne.dicentra.synapse.model.SynapseConfig
 import cloud.mallne.dicentra.synapse.service.APIDBService
 import cloud.mallne.dicentra.synapse.service.ScopeService
+import cloud.mallne.dicentra.synapse.service.CatalystExecutor
 import io.ktor.server.application.*
 import io.ktor.server.config.*
 import io.ktor.server.netty.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import org.koin.ktor.ext.inject
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
 fun Application.codexModule() {
+    val catalystExecutor by inject<CatalystExecutor>()
     val banner = object {}.javaClass.getResource("/banner.txt")?.readText()
     println(banner)
     install(Koin) {
@@ -36,8 +40,9 @@ fun Application.codexModule() {
         modules(module {
             single { environment.config.getAs<SynapseConfig>() }
             single { environment.config.getAs<CodexConfig>() }
-        }, DI, CodexDI)
+        }, DI, CodexDI, CatalystPluginModule)
     }
+    monitor.subscribe(ApplicationStopped) { catalystExecutor.close() }
     log.info("Starting up with Config: {}", environment.config.getAs<SynapseConfig>())
     configureDatabase(APIDBService.APIServiceData, ScopeService.Scopes, ActionsService.Actions, SyncEntries)
     configureSecurity()
