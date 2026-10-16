@@ -41,6 +41,8 @@ catalyst:
   per_target_timeout_millis: "$CATALYST_PER_TARGET_TIMEOUT_MILLIS:15000"
   overall_timeout_millis: "$CATALYST_OVERALL_TIMEOUT_MILLIS:30000"
   allowed_hosts: "$CATALYST_ALLOWED_HOSTS:"
+  # Public services may only be published by superadmins; their exact hosts can be trusted optionally.
+  allow_public_service_hosts: "$CATALYST_ALLOW_PUBLIC_SERVICE_HOSTS:false"
   server_name: "$CATALYST_SERVERNAME:"
   tls_enabled: "$CATALYST_TLSENABLED:true"
   title: "$CATALYST_TITLE:Synapse Catalyst"
