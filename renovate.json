@@ -8,7 +8,7 @@
     {
       "hostType": "maven",
       "matchHost": "https://registry.mallne.cloud/repository/DiCentraArtefacts/",
-      "username": "{{ env.NEXUS_USERNAME }}",
+      "username": "{{ variables.NEXUS_USERNAME }}",
       "password": "{{ secrets.NEXUS_PASSWORD }}"
     }
   ],
