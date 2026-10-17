@@ -2,7 +2,6 @@ package cloud.mallne.dicentra.areaassist.codex.di
 
 import cloud.mallne.dicentra.areaassist.aviator.AreaAssistParameters
 import cloud.mallne.dicentra.areaassist.extensions.CalculationExtensions
-import cloud.mallne.dicentra.areaassist.model.bundeslaender.Bundesland
 import cloud.mallne.dicentra.areaassist.model.curator.Query
 import cloud.mallne.dicentra.areaassist.model.curator.QueryContentHolder
 import cloud.mallne.dicentra.areaassist.model.geokit.GeokitVertexInterop
@@ -42,7 +41,7 @@ class AreaAssistCatalystActionFilter : CatalystActionFilter {
             }
             filtered = filtered.filter { action ->
                 val options = action.parcelOptions()
-                options.bounds.isEmpty() || points.any { point -> CalculationExtensions.rayCast(point, options.bounds) }
+                options.boundary.coordinates.isEmpty() || points.any { point -> CalculationExtensions.rayCast(point, options.boundary) }
             }
         }
 
@@ -52,15 +51,11 @@ class AreaAssistCatalystActionFilter : CatalystActionFilter {
                     (query.content as? QueryContentHolder.STRING)?.string
                 } else null
             }
-        if (parcelId != null && parcelId.length >= 2) {
-            val stateId = parcelId.take(2).toIntOrNull()
-            if (stateId != null) {
-                filtered = filtered.filter { action ->
-                    val options = action.parcelOptions()
-                    options.canInferWithParcelId && runCatching {
-                        Bundesland.getByIso(options.correspondsTo).deBId == stateId
-                    }.getOrDefault(false)
-                }
+        if (parcelId != null) {
+            filtered = filtered.filter { action ->
+                val prefix = action.parcelOptions().parcelIdPrefix
+                // Without an explicit matcher, this service cannot be ruled out by the ID.
+                prefix == null || parcelId.startsWith(prefix)
             }
         }
         return filtered
