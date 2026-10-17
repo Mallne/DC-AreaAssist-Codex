@@ -80,12 +80,9 @@
       ]
     },
     {
-      "description": "Automerge patch and minor updates to external npm development dependencies after CI passes",
+      "description": "Automerge patch and minor updates to external npm dependencies after CI passes",
       "matchDatasources": [
         "npm"
-      ],
-      "matchDepTypes": [
-        "devDependencies"
       ],
       "matchUpdateTypes": [
         "patch",
