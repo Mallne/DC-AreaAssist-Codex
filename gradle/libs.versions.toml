@@ -1,6 +1,6 @@
 [versions]
 # @pin
-agp = "9.2.1"
+agp = "9.4.1"
 # @keep
 android-compileSdk = "36"
 # @keep
