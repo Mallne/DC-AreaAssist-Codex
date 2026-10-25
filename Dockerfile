@@ -12,7 +12,7 @@ RUN --mount=type=secret,id=nexus_username \
     NEXUS_PASSWORD=$(cat /run/secrets/nexus_password) \
     gradle clean shadowJar --stacktrace "-Dorg.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" --no-daemon
 
-FROM eclipse-temurin:25-alpine@sha256:3fd2d245c4e0eba615fe366a71b8bd25f5db7104f53e4026b24bf508b880bd2a AS app
+FROM eclipse-temurin:25-alpine@sha256:1e20ead9eec7234db293f1913438090d533ed47c0b9e12dc8c7627a802a44ed6 AS app
 RUN apk add --no-cache curl
 
 ARG UID=1000
