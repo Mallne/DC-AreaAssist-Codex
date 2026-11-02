@@ -39,7 +39,7 @@ areaassist/server/
 |   +-- sync/
 |       +-- JvmSyncGenerators.kt  # SHA-256 checksum
 +-- src/main/resources/
-    +-- application.yaml
+    +-- application.conf      # HOCON configuration
     +-- db/migration/         # SQL migrations (V*__*.sql)
 ```
 

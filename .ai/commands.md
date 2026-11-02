@@ -27,7 +27,10 @@ resolve from the configured artifact registry. Export `NEXUS_USERNAME` and
 `NEXUS_PASSWORD` when registry authentication is required. In the monorepo the pinned
 root Nix devShell can supply Java 25; do not change its pins for startup failures.
 
-Configuration is in `src/main/resources/application.yaml`. Export database credentials
+Configuration is in `src/main/resources/application.conf` (HOCON), with standard defaults
+followed by `${?ENV}` overrides. `DATA_URL`, `DATA_USER`, and `DATA_PASSWORD` remain required
+substitutions without defaults; Codex no longer depends on `ktor-server-config-yaml`.
+Export database credentials
 through a trusted shell environment or secret manager; **Gradle does not load `.env`**.
 Do not blindly source `.env.example` (it contains placeholders and bare optional keys).
 `DATA_URL` must look like `postgresql://localhost:5432/postgres`, without `jdbc:` or
@@ -44,6 +47,14 @@ Use an existing PostgreSQL instance, or, after checking port 5432 is free, run
 `docker compose up -d postgres`. Compose uses the exported `DATA_USER`/`DATA_PASSWORD`
 for initial provisioning; an existing volume retains its original credentials. Do not
 remove volumes or replace a running database to resolve a startup problem.
+
+### HOCON migration verification
+
+At the user's explicit request, the introduced `HoconConfigurationTest`, direct
+`testImplementation(libs.typesafe.config)`, and catalog alias were removed. Production
+HOCON migration is unchanged. The earlier successful run (3 HOCON configuration tests
+under pinned Nix Java 25) is historical only, before these removals; no post-removal
+run is recorded here.
 
 ### Backend required for AreaAssist Web
 

@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.ktor.server.caching.headers)
     implementation(libs.ktor.server.compression)
     implementation(libs.ktor.server.netty)
-    implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.openapi)
     // Exposed
     implementation(libs.exposed.core)
