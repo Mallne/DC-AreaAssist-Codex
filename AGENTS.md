@@ -15,7 +15,13 @@
 ## Build
 
 ```bash
-./gradlew build
-./gradlew run
-docker-compose up -d  # PostgreSQL required
+./gradlew --no-daemon build
+./gradlew --no-daemon run
+docker compose up -d postgres  # Only if no PostgreSQL instance is already running
 ```
+
+Run from this checkout with Java 25 and exported database credentials; Gradle does not
+load `.env`. **Codex must be running for AreaAssist Web**, including static Docker hosting.
+See [Web backend startup](.ai/commands.md#backend-required-for-areaassist-web) for port
+8081, discovery, exact frontend CORS origins, and safe isolated-schema setup. Never
+reset/repair the existing `codex` schema to work around migration/checksum failures.
