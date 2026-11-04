@@ -2,10 +2,14 @@ package cloud.mallne.dicentra.areaassist.codex.di
 
 import cloud.mallne.dicentra.areaassist.aviator.AreaAssistParameters
 import cloud.mallne.dicentra.areaassist.aviator.esri.EsriAdapterPlugin
+import cloud.mallne.dicentra.areaassist.model.parcel.ParcelServiceOptions
 import cloud.mallne.dicentra.areaassist.model.parcel.domain.data.ParcelCrateEntity
-import cloud.mallne.dicentra.areaassist.statics.APIs
+import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceOptions`
 import cloud.mallne.dicentra.aviator.client.ktor.KtorAviatorServiceConverter
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-pluginMaterialization`
+import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator`
 import cloud.mallne.dicentra.aviator.core.NoBody
 import cloud.mallne.dicentra.aviator.koas.typed.Model
 import cloud.mallne.dicentra.aviator.koas.typed.Route
@@ -24,6 +28,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.headersOf
+import io.ktor.openapi.*
+import io.ktor.openapi.ReferenceOr.Value
 import io.ktor.openapi.ParameterType
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
@@ -49,8 +55,8 @@ class CatalystAreaAssistParityTest {
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
             )
         })
-        val (locator, sourceRoute) = AviatorServiceUtils.extractServiceLocators(APIs.esri)
-            .first { (_, route) -> EsriAdapterPlugin.identity in route.`x-dicentra-aviator-pluginMaterialization`.orEmpty() }
+        val definition = esriFixtureDefinition()
+        val (locator, sourceRoute) = AviatorServiceUtils.extractServiceLocators(definition).single()
         val koin = koinApplication { modules(CatalystPluginModule) }
         val contribution = koin.koin.getAll<CatalystPluginContribution>()
             .single { it.identity == EsriAdapterPlugin.identity }
@@ -79,7 +85,7 @@ class CatalystAreaAssistParityTest {
                 ),
             ),
         )
-        val action = ResolvedCatalystAction(APIServiceDTO(id = "areaassist-esri", serviceDefinition = APIs.esri), inputRoute, locator)
+        val action = ResolvedCatalystAction(APIServiceDTO(id = "areaassist-esri", serviceDefinition = definition), inputRoute, locator)
         val parameters = AreaAssistParameters.parameters(
             queries = listOf(AreaAssistParameters.parcelIdQuery("parcel-42")),
             returnGeometry = false,
@@ -94,9 +100,12 @@ class CatalystAreaAssistParityTest {
             resolveProviderHost = { listOf(InetAddress.getByName("8.8.8.8")) },
         )
         try {
-            val directService = KtorAviatorServiceConverter(client, Json).build(APIs.esri) {
+            val directServices = KtorAviatorServiceConverter(client, Json).build(definition) {
                 add(EsriAdapterPlugin.install { })
-            }.single { it.serviceLocator == locator && it.route.path == sourceRoute.path }
+            }
+            val directService = directServices.singleOrNull {
+                it.serviceLocator == locator && it.route.path == sourceRoute.path
+            } ?: error("No direct service for locator=$locator path=${sourceRoute.path}")
             val direct = requireNotNull(directService.requestContextful<List<ParcelCrateEntity>, NoBody>(
                 useSerializer = ListSerializer(ParcelCrateEntity.serializer()),
                 requestParams = parameters,
@@ -126,4 +135,47 @@ class CatalystAreaAssistParityTest {
         is JsonObject -> JsonObject(value.filterKeys { it !in setOf("fetchDate", "updated") }.mapValues { normalize(it.value) })
         else -> value
     }
+
+    private fun esriFixtureDefinition() = OpenApiDoc.build {
+        `x-dicentra-aviator` = cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.SpecVersion
+        info = OpenApiInfo(title = "Catalyst ESRI parity fixture", version = "1.0.0")
+        servers { server("https://services2.arcgis.com/jUpNdisbWqRpMo35/arcgis/rest/services") }
+    }.copy(
+        paths = mapOf(
+            "/FeatureServer/0/query" to Value(
+                PathItem(
+                    get = Operation.build {
+                        operationId = "ParcelQuery"
+                        `x-dicentra-aviator-serviceDelegateCall` = ParcelConstants.locator
+                        `x-dicentra-aviator-pluginMaterialization` = ParcelConstants.esriAdapterConfig
+                        `x-dicentra-aviator-serviceOptions` = ParcelServiceOptions(
+                            keys = ParcelConstants.DefaultKeys.fillIn(
+                                parcelId = "flurstueckskennzeichen",
+                                area = "amtlicheFlaeche",
+                            ),
+                            parcelLinkReference = "esri-parity-fixture",
+                        ).usable()
+                        parameters {
+                            query("where") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("geometry") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("geometryType") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("spatialRel") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("inSR") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("outSR") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("returnGeometry") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("outFields") { schema = JsonSchema(type = JsonType.STRING) }
+                            query("f") { schema = JsonSchema(type = JsonType.STRING) }
+                        }
+                        responses {
+                            response(200) {
+                                ContentType.Application.Json {
+                                    schema = JsonSchema(type = JsonType.OBJECT)
+                                }
+                            }
+                        }
+                    }
+                )
+            )
+        )
+    )
 }

@@ -2,6 +2,7 @@ package cloud.mallne.dicentra.areaassist.codex.routes
 
 import cloud.mallne.dicentra.areaassist.codex.model.CodexConfig
 import cloud.mallne.dicentra.areaassist.codex.model.Config
+import cloud.mallne.dicentra.areaassist.codex.model.asBuiltinService
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
@@ -9,7 +10,6 @@ import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
 import cloud.mallne.dicentra.synapse.model.DiscoveryResponse
 import cloud.mallne.dicentra.synapse.model.User
-import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.synapse.service.APIDBService
 import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.ScopeService
@@ -123,12 +123,7 @@ fun Application.builtin() {
                             prerelease = null,
                             buildmetadata = null
                         ) else ParcelConstants.endpointVersion
-                    ) + Config.getApplicationOIDCConfig(config)).map {
-                        APIServiceDTO(
-                            serviceDefinition = it,
-                            builtin = true
-                        )
-                    }
+                    ) + Config.getApplicationOIDCConfig(config)).map { it.asBuiltinService() }
 
                     log.info("Auto-ingesting ${services.size} Builtin Services...")
 

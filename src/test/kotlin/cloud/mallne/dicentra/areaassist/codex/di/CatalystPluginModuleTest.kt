@@ -4,17 +4,26 @@ import cloud.mallne.dicentra.areaassist.aviator.esri.EsriAdapterPlugin
 import cloud.mallne.dicentra.areaassist.aviator.wfs.WfsAdapterPlugin
 import cloud.mallne.dicentra.areaassist.aviator.AreaAssistParameters
 import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
+import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.api.DE_TH
+import cloud.mallne.dicentra.areaassist.statics.api.OpenMeteo
+import cloud.mallne.dicentra.areaassist.statics.api.Brightsky
+import cloud.mallne.dicentra.areaassist.model.weather.WeatherServiceOptions
 import cloud.mallne.dicentra.synapse.service.CatalystActionFilter
 import cloud.mallne.dicentra.synapse.service.CatalystPluginContribution
 import cloud.mallne.dicentra.synapse.service.CatalystExecutor
+import cloud.mallne.dicentra.synapse.service.CatalystFallbackActionFilter
 import cloud.mallne.dicentra.synapse.service.ResolvedCatalystAction
 import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.aviator.core.execution.RequestParameter
+import cloud.mallne.dicentra.aviator.core.execution.RequestParameters
+import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.core.plugins.AviatorPluginInstance
 import cloud.mallne.dicentra.aviator.model.AviatorServiceUtils
+import cloud.mallne.dicentra.aviator.koas.typed.Model
 import cloud.mallne.dicentra.aviator.plugin.adapter.json.JsonAdapter
 import cloud.mallne.dicentra.aviator.plugin.adapter.xml.XmlAdapter
+import cloud.mallne.dicentra.aviator.plugin.weaver.WeaverPlugin
 import cloud.mallne.dicentra.aviator.plugin.synapse.CatalystParameterCodecs
 import cloud.mallne.dicentra.aviator.plugin.synapse.CatalystRequest
 import cloud.mallne.dicentra.aviator.plugin.synapse.toCatalystParameters
@@ -91,6 +100,7 @@ class CatalystPluginModuleTest {
             assertEquals("[]", executor.execute(listOf(action), request).toString())
             assertTrue(requireNotNull(capturedBody).contains("GetFeature"))
             assertTrue(requireNotNull(capturedBody).contains("16-123-456"))
+
         } finally {
             executor.close()
             application.close()
@@ -102,12 +112,25 @@ class CatalystPluginModuleTest {
         val application = koinApplication { modules(CatalystPluginModule) }
         try {
             val koin = application.koin
-            assertNotNull(koin.get<CrsRegistry>())
-            assertEquals(listOf("areaassist:parcel-location"), koin.getAll<CatalystActionFilter>().map { it.identity })
+            val registry = koin.get<CrsRegistry>()
+            assertNotNull(registry)
+            assertTrue(registry.understands("4326"))
+            assertTrue(registry.understands("1149"))
+            assertTrue(registry.understands("25832"))
+            assertTrue(registry.understands("25833"))
+            assertEquals(
+                setOf("areaassist:parcel-location", "areaassist:weather-coverage"),
+                koin.getAll<CatalystActionFilter>().map { it.identity }.toSet(),
+            )
+            assertTrue(
+                koin.getAll<CatalystActionFilter>()
+                    .single { it.identity == "areaassist:weather-coverage" } is CatalystFallbackActionFilter,
+            )
 
             val contributions = koin.getAll<CatalystPluginContribution>().associateBy { it.identity }
             assertTrue(contributions.containsKey(EsriAdapterPlugin.identity))
             assertTrue(contributions.containsKey(WfsAdapterPlugin.IDENTITY))
+            assertTrue(contributions.containsKey(WeaverPlugin.identity))
             val esri = requireNotNull(contributions[EsriAdapterPlugin.identity])
             val wfs = requireNotNull(contributions[WfsAdapterPlugin.IDENTITY])
             assertTrue(esri.parameterCodecs.isNotEmpty())
@@ -126,6 +149,64 @@ class CatalystPluginModuleTest {
         } finally {
             application.close()
         }
+    }
+
+    @Test
+    fun `OpenMeteo OpenAPI inputs and Weaver request recipe are configured`() {
+        val application = koinApplication { modules(CatalystPluginModule) }
+        try {
+            assertTrue(application.koin.getAll<CatalystPluginContribution>().any { it.identity == WeaverPlugin.identity })
+            val definition = OpenMeteo.value
+            val (locator, route) = AviatorServiceUtils.extractServiceLocators(definition)
+                .single { it.first.locator == APIs.Services.WEATHER_SERVICE_FORECAST.locator(ServiceMethods.GATHER).locator }
+            assertNotNull(WeatherServiceOptions.OpenMeteo.weaverSchema)
+            val requestParametersSchema = assertNotNull(WeatherServiceOptions.OpenMeteo.requestParametersSchema)
+            assertTrue(requestParametersSchema.transforms.any { it.key == "parameters" })
+            assertTrue(route.input.map { it.name }.toSet().containsAll(setOf("lat", "lon", "date", "last_date", "max_dist", "tz", "units")))
+            assertEquals(
+                "auto",
+                (route.input.single { it.name == "timezone" }.type as Model.Primitive.String).default,
+            )
+        } finally {
+            application.close()
+        }
+    }
+
+    @Test
+    fun `weather Catalyst filter orders BrightSky before OpenMeteo in Germany and excludes it outside coverage`() {
+        val brightSkyDefinition = Brightsky.value
+        val (brightSkyLocator, brightSkyRoute) = AviatorServiceUtils.extractServiceLocators(brightSkyDefinition)
+            .single { it.first.locator == APIs.Services.WEATHER_SERVICE_FORECAST.locator(ServiceMethods.GATHER).locator }
+        val brightSky = ResolvedCatalystAction(
+            APIServiceDTO(id = "brightsky", serviceDefinition = brightSkyDefinition), brightSkyRoute, brightSkyLocator,
+        )
+        val openMeteoDefinition = OpenMeteo.value
+        val (openMeteoLocator, openMeteoRoute) = AviatorServiceUtils.extractServiceLocators(openMeteoDefinition)
+            .single { it.first.locator == APIs.Services.WEATHER_SERVICE_FORECAST.locator(ServiceMethods.GATHER).locator }
+        val openMeteo = ResolvedCatalystAction(
+            APIServiceDTO(id = "open-meteo", serviceDefinition = openMeteoDefinition), openMeteoRoute, openMeteoLocator,
+        )
+        val filter = WeatherCoverageActionFilter()
+
+        val germany = filter.select(
+            listOf(openMeteo, brightSky),
+            CatalystRequest(),
+            RequestParameters(mutableMapOf(
+                "lat" to RequestParameter.Single(51.4),
+                "lon" to RequestParameter.Single(10.8),
+            )),
+        )
+        val paris = filter.select(
+            listOf(openMeteo, brightSky),
+            CatalystRequest(),
+            RequestParameters(mutableMapOf(
+                "lat" to RequestParameter.Single(48.86),
+                "lon" to RequestParameter.Single(2.35),
+            )),
+        )
+
+        assertEquals(listOf("brightsky", "open-meteo"), germany?.map { it.service.id })
+        assertEquals(listOf("open-meteo"), paris?.map { it.service.id })
     }
 
     @Test
