@@ -4,14 +4,6 @@
     "config:recommended",
     ":semanticCommits"
   ],
-  "hostRules": [
-    {
-      "hostType": "maven",
-      "matchHost": "https://registry.mallne.cloud/repository/DiCentraArtefacts/",
-      "username": "{{ env.NEXUS_USERNAME }}",
-      "password": "{{ secrets.NEXUS_PASSWORD }}"
-    }
-  ],
   "packageRules": [
     {
       "matchDatasources": [
