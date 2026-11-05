@@ -1,8 +1,8 @@
 [versions]
 # @pin
-agp = "9.2.1"
+agp = "9.4.1"
 # @keep
-android-compileSdk = "36"
+android-compileSdk = "37"
 # @keep
 android-minSdk = "24"
 ben-manes-versions-v = "0.67.0"
