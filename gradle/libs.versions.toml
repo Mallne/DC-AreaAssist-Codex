@@ -81,7 +81,7 @@ flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway-ver" }
 flyway-pg = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway-ver" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.11.0" }
-mockk = { module = "io.mockk:mockk", version = "1.14.11" }
+mockk = { module = "io.mockk:mockk", version = "1.14.12" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 mcp = { module = "io.modelcontextprotocol:kotlin-sdk", version.ref = "mcp" }
 postgres = { module = "org.postgresql:r2dbc-postgresql", version.ref = "postgres" }
