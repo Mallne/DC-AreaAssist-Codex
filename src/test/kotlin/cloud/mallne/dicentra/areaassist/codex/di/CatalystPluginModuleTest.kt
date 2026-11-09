@@ -6,6 +6,7 @@ import cloud.mallne.dicentra.areaassist.aviator.AreaAssistParameters
 import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.api.DE_TH
+import cloud.mallne.dicentra.areaassist.statics.api.DE_ST
 import cloud.mallne.dicentra.areaassist.statics.api.OpenMeteo
 import cloud.mallne.dicentra.areaassist.statics.api.Brightsky
 import cloud.mallne.dicentra.areaassist.model.weather.WeatherServiceOptions
@@ -35,6 +36,7 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.serialization.json.Json
@@ -49,6 +51,59 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class CatalystPluginModuleTest {
+    @Test
+    fun `Saxony Anhalt projected WFS bbox stays near its geographic request`() = runBlocking {
+        val application = koinApplication { modules(CatalystPluginModule) }
+        val host = "www.geodatenportal.sachsen-anhalt.de"
+        var capturedUrl: String? = null
+        val httpClient = HttpClient(MockEngine { request ->
+            assertEquals(HttpMethod.Get, request.method)
+            assertTrue(request.url.parameters.contains("bbox"), "The restored WFS GET must include its BBOX KVP")
+            assertTrue(request.url.parameters.contains("typeNames"), "The restored WFS GET must include its type name")
+            capturedUrl = request.url.toString()
+            respond(
+                """<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" timeStamp="2026-11-09T00:00:00Z" numberMatched="0" numberReturned="0"/>""",
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Xml.toString()),
+            )
+        })
+        val jsonContribution = object : CatalystPluginContribution {
+            override val identity = JsonAdapter.identity
+            override fun create(): AviatorPluginInstance = JsonAdapter.install { }
+        }
+        val xmlContribution = object : CatalystPluginContribution {
+            override val identity = XmlAdapter.identity
+            override val activateByDefault = true
+            override fun create(): AviatorPluginInstance = XmlAdapter.install { }
+        }
+        val contributions = application.koin.getAll<CatalystPluginContribution>() + listOf(jsonContribution, xmlContribution)
+        val (locator, route) = AviatorServiceUtils.extractServiceLocators(DE_ST.value)
+            .single { it.first.locator == ParcelConstants.locator.locator }
+        val action = ResolvedCatalystAction(APIServiceDTO(id = "saxony-anhalt", serviceDefinition = DE_ST.value), route, locator)
+        val executor = CatalystExecutor(
+            contributions = contributions,
+            client = httpClient,
+            allowedHosts = listOf(host),
+            resolveProviderHost = { listOf(InetAddress.getByName("8.8.8.8")) },
+        )
+
+        try {
+            val requestParameters = AreaAssistParameters.parameters(
+                boundary = Boundary(north = 51.992516, east = 11.484985, south = 51.976453, west = 11.469291),
+            )
+            executor.execute(
+                listOf(action),
+                CatalystRequest(typedParameters = requestParameters.toCatalystParameters(Json)),
+            )
+            val requestUrl = requireNotNull(capturedUrl)
+            assertTrue(requestUrl.contains("bbox="), "The GET query must include its projected BBOX: $requestUrl")
+            assertTrue(requestUrl.contains("576"), "Expected BBOX northing near 5.76 Mm: $requestUrl")
+            assertTrue(!requestUrl.contains("5960000"), "BBOX must not be displaced north by ~200 km: $requestUrl")
+        } finally {
+            executor.close()
+            application.close()
+        }
+    }
+
     @Test
     fun `Catalyst forwards AreaAssist parcel inputs through the real WFS adapter`(): Unit = runBlocking {
         val application = koinApplication { modules(CatalystPluginModule) }
