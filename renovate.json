@@ -50,9 +50,7 @@
         "circleci",
         "bitbucket-pipelines",
         "buildkite",
-        "drone",
         "jenkins",
-        "teamcity",
         "woodpecker"
       ],
       "automerge": true
