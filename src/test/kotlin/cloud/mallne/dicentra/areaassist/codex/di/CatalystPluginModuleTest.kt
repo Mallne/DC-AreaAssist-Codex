@@ -8,10 +8,12 @@ import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.api.DE_TH
 import cloud.mallne.dicentra.areaassist.statics.api.DE_ST
 import cloud.mallne.dicentra.areaassist.statics.api.OpenMeteo
+import cloud.mallne.dicentra.areaassist.statics.api.WeatherWorkflows
 import cloud.mallne.dicentra.areaassist.statics.api.Brightsky
 import cloud.mallne.dicentra.areaassist.model.weather.WeatherServiceOptions
 import cloud.mallne.dicentra.synapse.service.CatalystActionFilter
 import cloud.mallne.dicentra.synapse.service.CatalystPluginContribution
+import cloud.mallne.dicentra.synapse.service.SynapsePluginBundle
 import cloud.mallne.dicentra.synapse.service.CatalystExecutor
 import cloud.mallne.dicentra.synapse.service.CatalystFallbackActionFilter
 import cloud.mallne.dicentra.synapse.service.ResolvedCatalystAction
@@ -52,6 +54,20 @@ import kotlin.test.assertTrue
 
 class CatalystPluginModuleTest {
     @Test
+    fun `weather workflow sources resolve only visible unique builtin services`() {
+        val application = koinApplication { modules(CatalystPluginModule) }
+        try {
+            val resolver = application.koin.get<SynapsePluginBundle>().resolveWorkflowSource
+            val service = APIServiceDTO(id = "weather", serviceDefinition = OpenMeteo.value, builtin = true)
+            assertEquals("weather", resolver(WeatherWorkflows.OPEN_METEO_SOURCE, listOf(service)))
+            assertEquals(null, resolver(WeatherWorkflows.OPEN_METEO_SOURCE, emptyList()))
+            assertEquals(null, resolver(WeatherWorkflows.OPEN_METEO_SOURCE, listOf(service.copy(builtin = false))))
+            assertEquals(null, resolver(WeatherWorkflows.OPEN_METEO_SOURCE, listOf(service, service.copy(id = "other"))))
+        } finally {
+            application.close()
+        }
+    }
+    @Test
     fun `Saxony Anhalt projected WFS bbox stays near its geographic request`() = runBlocking {
         val application = koinApplication { modules(CatalystPluginModule) }
         val host = "www.geodatenportal.sachsen-anhalt.de"
@@ -75,7 +91,7 @@ class CatalystPluginModuleTest {
             override val activateByDefault = true
             override fun create(): AviatorPluginInstance = XmlAdapter.install { }
         }
-        val contributions = application.koin.getAll<CatalystPluginContribution>() + listOf(jsonContribution, xmlContribution)
+        val contributions = application.koin.get<SynapsePluginBundle>().catalystPlugins + listOf(jsonContribution, xmlContribution)
         val (locator, route) = AviatorServiceUtils.extractServiceLocators(DE_ST.value)
             .single { it.first.locator == ParcelConstants.locator.locator }
         val action = ResolvedCatalystAction(APIServiceDTO(id = "saxony-anhalt", serviceDefinition = DE_ST.value), route, locator)
@@ -127,7 +143,7 @@ class CatalystPluginModuleTest {
             override val activateByDefault = true
             override fun create(): AviatorPluginInstance = XmlAdapter.install { }
         }
-        val contributions = application.koin.getAll<CatalystPluginContribution>() + listOf(jsonContribution, xmlContribution)
+        val contributions = application.koin.get<SynapsePluginBundle>().catalystPlugins + listOf(jsonContribution, xmlContribution)
         val definition = DE_TH.value
         val locator = ParcelConstants.locator
         val (resolvedLocator, route) = AviatorServiceUtils.extractServiceLocators(definition)
@@ -175,14 +191,14 @@ class CatalystPluginModuleTest {
             assertTrue(registry.understands("25833"))
             assertEquals(
                 setOf("areaassist:parcel-location", "areaassist:weather-coverage"),
-                koin.getAll<CatalystActionFilter>().map { it.identity }.toSet(),
+                koin.get<SynapsePluginBundle>().actionFilters.map { it.identity }.toSet(),
             )
             assertTrue(
-                koin.getAll<CatalystActionFilter>()
+                koin.get<SynapsePluginBundle>().actionFilters
                     .single { it.identity == "areaassist:weather-coverage" } is CatalystFallbackActionFilter,
             )
 
-            val contributions = koin.getAll<CatalystPluginContribution>().associateBy { it.identity }
+            val contributions = koin.get<SynapsePluginBundle>().catalystPlugins.associateBy { it.identity }
             assertTrue(contributions.containsKey(EsriAdapterPlugin.identity))
             assertTrue(contributions.containsKey(WfsAdapterPlugin.IDENTITY))
             assertTrue(contributions.containsKey(WeaverPlugin.identity))
@@ -210,14 +226,16 @@ class CatalystPluginModuleTest {
     fun `OpenMeteo OpenAPI inputs and Weaver request recipe are configured`() {
         val application = koinApplication { modules(CatalystPluginModule) }
         try {
-            assertTrue(application.koin.getAll<CatalystPluginContribution>().any { it.identity == WeaverPlugin.identity })
+            assertTrue(application.koin.get<SynapsePluginBundle>().catalystPlugins.any { it.identity == WeaverPlugin.identity })
             val definition = OpenMeteo.value
             val (locator, route) = AviatorServiceUtils.extractServiceLocators(definition)
                 .single { it.first.locator == APIs.Services.WEATHER_SERVICE_FORECAST.locator(ServiceMethods.GATHER).locator }
             assertNotNull(WeatherServiceOptions.OpenMeteo.weaverSchema)
             val requestParametersSchema = assertNotNull(WeatherServiceOptions.OpenMeteo.requestParametersSchema)
             assertTrue(requestParametersSchema.transforms.any { it.key == "parameters" })
-            assertTrue(route.input.map { it.name }.toSet().containsAll(setOf("lat", "lon", "date", "last_date", "max_dist", "tz", "units")))
+            assertTrue(route.input.map { it.name }.toSet().containsAll(
+                setOf("latitude", "longitude", "start_date", "end_date", "timezone"),
+            ))
             assertEquals(
                 "auto",
                 (route.input.single { it.name == "timezone" }.type as Model.Primitive.String).default,
@@ -268,7 +286,7 @@ class CatalystPluginModuleTest {
     fun `AreaAssist boundary query list and boolean survive registered Catalyst codec roundtrip`() {
         val application = koinApplication { modules(CatalystPluginModule) }
         try {
-            val contributions = application.koin.getAll<CatalystPluginContribution>()
+            val contributions = application.koin.get<SynapsePluginBundle>().catalystPlugins
             val registry = CatalystParameterCodecs(contributions.flatMap { it.parameterCodecs })
             val boundary = Boundary(north = 52.0, east = 13.0, south = 50.0, west = 11.0)
             val queries = listOf(AreaAssistParameters.parcelIdQuery("parcel-42"))

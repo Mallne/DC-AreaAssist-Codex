@@ -19,6 +19,7 @@ import cloud.mallne.dicentra.aviator.plugin.synapse.toCatalystParameters
 import cloud.mallne.dicentra.synapse.model.dto.APIServiceDTO
 import cloud.mallne.dicentra.synapse.service.CatalystExecutor
 import cloud.mallne.dicentra.synapse.service.CatalystPluginContribution
+import cloud.mallne.dicentra.synapse.service.SynapsePluginBundle
 import cloud.mallne.dicentra.synapse.service.ResolvedCatalystAction
 import cloud.mallne.geokit.Boundary
 import io.ktor.client.HttpClient
@@ -58,7 +59,7 @@ class CatalystAreaAssistParityTest {
         val definition = esriFixtureDefinition()
         val (locator, sourceRoute) = AviatorServiceUtils.extractServiceLocators(definition).single()
         val koin = koinApplication { modules(CatalystPluginModule) }
-        val contribution = koin.koin.getAll<CatalystPluginContribution>()
+        val contribution = koin.koin.get<SynapsePluginBundle>().catalystPlugins
             .single { it.identity == EsriAdapterPlugin.identity }
         val inputRoute = sourceRoute.copy(
             input = listOf(

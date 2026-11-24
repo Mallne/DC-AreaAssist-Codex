@@ -5,14 +5,15 @@ import cloud.mallne.dicentra.areaassist.aviator.esri.EsriAdapterPlugin
 import cloud.mallne.dicentra.areaassist.aviator.wfs.WfsAdapterPlugin
 import cloud.mallne.dicentra.areaassist.model.curator.Query
 import cloud.mallne.dicentra.areaassist.model.parcel.domain.data.ParcelCrateEntity
+import cloud.mallne.dicentra.areaassist.statics.api.WeatherWorkflows
 import cloud.mallne.dicentra.aviator.core.plugins.AviatorPluginInstance
 import cloud.mallne.dicentra.aviator.plugin.synapse.CatalystParameterValue
 import cloud.mallne.dicentra.aviator.plugin.synapse.CatalystResultCodec
 import cloud.mallne.dicentra.aviator.plugin.weaver.WeaverPlugin
-import cloud.mallne.dicentra.synapse.service.CatalystActionFilter
 import cloud.mallne.dicentra.synapse.service.CatalystOrderedFallbackActionFilter
 import cloud.mallne.dicentra.synapse.service.CatalystParameterContract
 import cloud.mallne.dicentra.synapse.service.CatalystPluginContribution
+import cloud.mallne.dicentra.synapse.service.SynapsePluginBundle
 import cloud.mallne.geokit.Boundary
 import cloud.mallne.geokit.coordinates.CrsRegistry
 import cloud.mallne.geokit.coordinates.builtin.BuiltInCoordinateReferenceSystems
@@ -21,7 +22,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 private class EsriCatalystContribution : CatalystPluginContribution {
@@ -89,11 +89,30 @@ val CatalystPluginModule = module {
             ingest(BuiltInCoordinateReferenceSystems.EPSG25833)
         }
     }
-    single<CatalystActionFilter>(named("areaassist:parcel-location")) { AreaAssistCatalystActionFilter() }
-    single<CatalystActionFilter>(named("areaassist:weather-coverage")) {
-        CatalystOrderedFallbackActionFilter(WeatherCoverageActionFilter())
+    single {
+        SynapsePluginBundle(
+            catalystPlugins = listOf(EsriCatalystContribution(), WfsCatalystContribution(get()), WeaverCatalystContribution()),
+            actionFilters = listOf(
+                AreaAssistCatalystActionFilter(),
+                CatalystOrderedFallbackActionFilter(WeatherCoverageActionFilter()),
+            ),
+            resolveWorkflowSource = { source, visible ->
+                WeatherWorkflows.sources[source]?.let { expected ->
+                    visible.filter { candidate ->
+                        candidate.builtin &&
+                            candidate.serviceDefinition.info.title == expected.info.title &&
+                            candidate.serviceDefinition.servers == expected.servers
+                    }.singleOrNull()?.id
+                }
+            },
+            workflowParameterAliases = { action ->
+                val expected = WeatherWorkflows.sources[WeatherWorkflows.OPEN_METEO_SOURCE]
+                if (action.service.builtin && expected != null &&
+                    action.service.serviceDefinition.info.title == expected.info.title &&
+                    action.service.serviceDefinition.servers == expected.servers &&
+                    action.route.operationId == "OpenMeteoForecast"
+                ) mapOf("lat" to "latitude", "lon" to "longitude") else emptyMap()
+            },
+        )
     }
-    single<CatalystPluginContribution>(named(EsriAdapterPlugin.identity)) { EsriCatalystContribution() }
-    single<CatalystPluginContribution>(named(WfsAdapterPlugin.IDENTITY)) { WfsCatalystContribution(get()) }
-    single<CatalystPluginContribution>(named(WeaverPlugin.identity)) { WeaverCatalystContribution() }
 }

@@ -5,6 +5,7 @@ import cloud.mallne.dicentra.areaassist.codex.model.Config
 import cloud.mallne.dicentra.areaassist.codex.model.asBuiltinService
 import cloud.mallne.dicentra.areaassist.statics.APIs
 import cloud.mallne.dicentra.areaassist.statics.ParcelConstants
+import cloud.mallne.dicentra.areaassist.statics.api.WeatherWorkflows
 import cloud.mallne.dicentra.aviator.core.AviatorExtensionSpec.`x-dicentra-aviator-serviceDelegateCall`
 import cloud.mallne.dicentra.aviator.core.ServiceMethods
 import cloud.mallne.dicentra.aviator.model.ServiceLocator
@@ -13,6 +14,8 @@ import cloud.mallne.dicentra.synapse.model.User
 import cloud.mallne.dicentra.synapse.service.APIDBService
 import cloud.mallne.dicentra.synapse.service.DatabaseService
 import cloud.mallne.dicentra.synapse.service.ScopeService
+import cloud.mallne.dicentra.synapse.service.WorkflowDBService
+import cloud.mallne.dicentra.synapse.service.StoredWorkflow
 import cloud.mallne.dicentra.synapse.statics.ResponseObject
 import cloud.mallne.dicentra.synapse.statics.verify
 import io.ktor.http.*
@@ -27,6 +30,7 @@ import io.ktor.utils.io.*
 import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 /**
  * Configures the discovery-related endpoints for the application. This method
@@ -67,6 +71,7 @@ fun Application.builtin() {
     val apiService by inject<APIDBService>()
     val scopeService by inject<ScopeService>()
     val db by inject<DatabaseService>()
+    val workflows by inject<WorkflowDBService>()
 
     val log = LoggerFactory.getLogger("Builtin")
 
@@ -141,6 +146,12 @@ fun Application.builtin() {
                         val id = apiService.create(service)
                         log.debug("Created Builtin Service: $id")
                         created.add(id)
+                    }
+                    WeatherWorkflows.definitions.distinctBy { it.documentId }.forEach { definition ->
+                        val workflowId = WorkflowDBService.BUILTIN_PREFIX + UUID.nameUUIDFromBytes(
+                            "areaassist:workflow:${definition.documentId}".encodeToByteArray(),
+                        ).toString().replace("-", "").take(28)
+                        workflows.upsertBuiltin(StoredWorkflow(workflowId, null, definition.document, builtin = true))
                     }
 
                     log.info("Auto-ingest complete!")
